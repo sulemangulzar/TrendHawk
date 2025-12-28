@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# TrendHawk Frontend
 
-## Getting Started
+## Development Setup
 
-First, run the development server:
-
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create `.env.local`:
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_test_...
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+3. Start development server:
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000)
 
-## Learn More
+## Production Build
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+See [DEPLOYMENT.md](../../DEPLOYMENT.md) for Vercel deployment instructions.
 
-## Deploy on Vercel
+## Environment Variables
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Development (`.env.local`)
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_test_...
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Production (Vercel Dashboard)
+```bash
+NEXT_PUBLIC_API_URL=https://your-backend-url.com/api
+NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_live_...
+```
+
+## Project Structure
+
+```
+frontend/
+├── app/                    # Next.js 13+ App Router
+│   ├── (auth)/            # Auth pages (login, signup)
+│   ├── dashboard/         # Dashboard pages
+│   ├── checkout/          # Checkout page
+│   ├── layout.js          # Root layout
+│   └── page.js            # Landing page
+├── components/            # Reusable components
+│   ├── ui/               # UI components (Button, Input)
+│   ├── Sidebar.js        # Dashboard sidebar
+│   ├── ProductCard.js    # Product card component
+│   └── Footer.js         # Footer component
+├── context/              # React contexts
+│   ├── AuthContext.js    # Authentication context
+│   └── ThemeContext.js   # Theme context
+└── utils/                # Utility functions
+    └── api.js            # API client
+```
+
+## Features
+
+- ✅ Authentication (Login/Signup)
+- ✅ Dashboard with product research
+- ✅ Saved products
+- ✅ Dark mode
+- ✅ Responsive design
+- ✅ Stripe integration (ready)
+
+## Tech Stack
+
+- Next.js 14
+- React 18
+- Tailwind CSS
+- Framer Motion
+- Lucide Icons

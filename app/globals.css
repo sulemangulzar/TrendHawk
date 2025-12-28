@@ -1,26 +1,145 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Override sans font to Poppins */
+  --font-sans: var(--font-poppins), sans-serif;
+
+  /* CUSTOM USER GREEN PALETTE (#c1ee46 base) */
+  --color-lime-50: #fdffef;
+  --color-lime-100: #f6ffcd;
+  --color-lime-200: #ecff9a;
+  --color-lime-300: #e1ff63;
+  --color-lime-400: #d2f654;
+  --color-lime-500: #c1ee46;
+  /* PRIMARY USER COLOR */
+  --color-lime-600: #9acc1f;
+  /* Darker for hover */
+  --color-lime-700: #759e13;
+  --color-lime-800: #5c7b13;
+  --color-lime-900: #4a6215;
+  --color-lime-950: #263506;
+
+  /* Neutral Grays - Clean */
+  --color-forest-50: #f8fafc;
+  --color-forest-100: #f1f5f9;
+  --color-forest-200: #e2e8f0;
+  --color-forest-300: #cbd5e1;
+  --color-forest-400: #94a3b8;
+  --color-forest-500: #64748b;
+  --color-forest-600: #475569;
+  --color-forest-700: #334155;
+  --color-forest-800: #1e293b;
+  --color-forest-900: #0f172a;
+  --color-forest-950: #020617;
+  /* Very dark slate, close to black */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth scrolling for entire website */
+html {
+  scroll-behavior: smooth;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Apply Poppins font globally to all elements */
+* {
+  font-family: var(--font-poppins), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure inputs, buttons, and form elements use Poppins */
+input,
+button,
+textarea,
+select {
+  font-family: var(--font-poppins), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* Custom scrollbar styling (optional) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+@layer base {
+
+  body {
+    @apply bg-white text-gray-900 transition-colors duration-200;
+  }
+
+  .dark body {
+    @apply bg-black text-white;
+  }
+
+  /* Override primary buttons to have dark text because #c1ee46 is light */
+  /* This ensures accessibility on the bright lime buttons */
+  .bg-lime-500 {
+    color: #1a2e05 !important;
+    /* Dark text on bright lime */
+    font-weight: 600;
+  }
+
+  .dark .bg-lime-500 {
+    color: #1a2e05 !important;
+  }
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #333333;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
 }
