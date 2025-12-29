@@ -1,202 +1,322 @@
 "use client";
-import { useState } from 'react';
-import api from '@/utils/api';
-import ProductCard from '@/components/ProductCard';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { Search, Loader2, TrendingUp, Package, Star } from 'lucide-react';
 import { Button } from '@/components/ui';
-import { Search, Loader2, TrendingUp, Package, Star, Filter } from 'lucide-react';
-import clsx from 'clsx';
-
-const PLATFORMS = [
-    { id: 'Amazon', label: 'Amazon', color: 'from-orange-500 to-orange-600' },
-    { id: 'AliExpress', label: 'AliExpress', color: 'from-red-500 to-red-600' },
-    { id: 'Ebay', label: 'eBay', color: 'from-blue-500 to-blue-600' },
-    { id: 'Etsy', label: 'Etsy', color: 'from-orange-600 to-orange-700' },
-    { id: 'Daraz', label: 'Daraz', color: 'from-orange-400 to-orange-500' }
-];
+import ProductCard from '@/components/ProductCard';
+import ProfitCalculatorModal from '@/components/ProfitCalculatorModal';
 
 export default function DashboardPage() {
-    const [selectedPlatform, setSelectedPlatform] = useState('Amazon');
+    const { user } = useAuth();
+    const [keyword, setKeyword] = useState('');
+    const [platform, setPlatform] = useState('amazon');
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [jobId, setJobId] = useState(null);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [showCalculator, setShowCalculator] = useState(false);
     const [error, setError] = useState('');
+    const [planLimits, setPlanLimits] = useState(null);
 
-    const fetchProducts = async () => {
-        setLoading(true);
-        setError('');
+    // Check plan limits on mount
+    useEffect(() => {
+        if (user) {
+            checkPlanLimits();
+        }
+    }, [user]);
+
+    const checkPlanLimits = async () => {
+        try {
+            const res = await fetch(`/api/plan-limits?userId=${user.id}`);
+            const data = await res.json();
+            setPlanLimits(data);
+        } catch (error) {
+            console.error('Plan limits error:', error);
+        }
+    };
+
+    // Clear results when platform changes
+    const handlePlatformChange = (newPlatform) => {
+        setPlatform(newPlatform);
         setProducts([]);
+        setKeyword('');
+        setError('');
+        setJobId(null);
+    };
+
+    // Poll for job status
+    useEffect(() => {
+        if (!jobId) return;
+
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch(`/api/status/${jobId}`);
+                const data = await res.json();
+
+                if (data.status === 'completed') {
+                    setProducts(data.products);
+                    setLoading(false);
+                    setJobId(null);
+                } else if (data.status === 'failed') {
+                    setError('Search failed: ' + (data.error_message || 'Unknown error'));
+                    setLoading(false);
+                    setJobId(null);
+                }
+            } catch (error) {
+                console.error('Status check error:', error);
+            }
+        }, 2000);
+
+        return () => clearInterval(interval);
+    }, [jobId]);
+
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        if (!keyword.trim()) return;
+
+        // Check if user can search
+        if (planLimits && !planLimits.usage.canSearch) {
+            setError(`You've used all ${planLimits.limits.searchesPerMonth} free searches this month. Upgrade to continue!`);
+            return;
+        }
+
+        setLoading(true);
+        setProducts([]);
+        setError('');
 
         try {
-            const { data } = await api.get(`trending/${selectedPlatform}/`);
-            setProducts(data.products || []);
-        } catch (err) {
-            console.error(err);
-            setError(err.response?.data?.error || 'Failed to fetch products');
-        } finally {
+            const res = await fetch('/api/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    keyword: keyword.trim(),
+                    userId: user.id,
+                    platform: platform,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            if (data.status === 'cached') {
+                // Cached results - show immediately
+                setProducts(data.products);
+                setLoading(false);
+            } else if (data.status === 'pending') {
+                // Start polling
+                setJobId(data.job_id);
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+            setError(error.message || 'Search failed. Please try again.');
             setLoading(false);
         }
     };
 
-    const categories = ['All', ...new Set(products.map(p => p.category).filter(Boolean))];
-    const [selectedCategory, setSelectedCategory] = useState('All');
-
-    const filteredProducts = products.filter(product =>
-        selectedCategory === 'All' || product.category === selectedCategory
-    );
+    const handleCalculateProfit = (product) => {
+        setSelectedProduct(product);
+        setShowCalculator(true);
+    };
 
     // Stats
-    const totalProducts = filteredProducts.length;
-    const avgDemand = filteredProducts.length > 0
-        ? Math.round(filteredProducts.reduce((acc, p) => acc + (p.analysis?.demand_score || 0), 0) / filteredProducts.length)
+    const totalProducts = products.length;
+    const avgPrice = products.length > 0
+        ? (products.reduce((acc, p) => acc + (p.price || 0), 0) / products.length).toFixed(2)
         : 0;
-    const highPotential = filteredProducts.filter(p => (p.analysis?.demand_score || 0) > 70).length;
+    const highOpportunity = products.filter(p => (p.review_count || 0) < 50).length;
 
     return (
-        <div className="space-y-4 md:space-y-6 font-poppins max-w-7xl mx-auto">
+        <div className="space-y-6 font-poppins max-w-7xl mx-auto">
             {/* Header */}
             <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-forest-900 dark:text-white mb-1 md:mb-2">
-                    Product Research
+                <h1 className="text-3xl font-bold text-forest-900 dark:text-white mb-2">
+                    Find Winning Products
                 </h1>
-                <p className="text-sm md:text-base text-forest-600 dark:text-forest-400">
-                    Discover trending products across multiple platforms
+                <p className="text-forest-600 dark:text-forest-400">
+                    Search Amazon for trending products and analyze profit potential
                 </p>
             </div>
 
             {/* Platform Selector */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
-                {PLATFORMS.map((platform) => (
+            <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    Select Platform
+                </label>
+                <div className="grid grid-cols-2 gap-4">
                     <button
-                        key={platform.id}
-                        onClick={() => setSelectedPlatform(platform.id)}
-                        className={clsx(
-                            "p-3 md:p-5 rounded-xl md:rounded-2xl border transition-all text-left group relative overflow-hidden",
-                            selectedPlatform === platform.id
-                                ? "bg-white dark:bg-forest-900 border-lime-500 dark:border-lime-500 shadow-xl shadow-lime-500/10"
-                                : "bg-white dark:bg-forest-900/40 border-gray-200 dark:border-forest-800 hover:border-lime-200 dark:hover:border-forest-700"
-                        )}
+                        type="button"
+                        onClick={() => setPlatform('amazon')}
+                        className={`p-4 rounded-xl border-2 transition-all ${platform === 'amazon'
+                            ? 'border-lime-500 bg-lime-50 dark:bg-lime-900/20'
+                            : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-forest-900/40'
+                            }`}
                     >
-                        {selectedPlatform === platform.id && (
-                            <div className="absolute top-2 right-2 md:top-3 md:right-3 w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-lime-500 animate-pulse shadow-[0_0_10px_rgba(132,204,22,0.6)]" />
-                        )}
-                        <h3 className={clsx(
-                            "font-bold text-base md:text-lg transition-colors mb-0.5 md:mb-1",
-                            selectedPlatform === platform.id ? "text-forest-900 dark:text-white" : "text-forest-500 dark:text-forest-400"
-                        )}>
-                            {platform.label}
-                        </h3>
-                        <p className="text-[10px] md:text-xs text-gray-400 dark:text-forest-500 font-medium">Top Trending</p>
+                        <div className="flex items-center gap-3">
+                            <div className="text-3xl">🛒</div>
+                            <div className="text-left">
+                                <div className="font-bold text-gray-900 dark:text-white">Amazon</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">Global marketplace</div>
+                            </div>
+                        </div>
                     </button>
-                ))}
+                    <button
+                        type="button"
+                        onClick={() => setPlatform('ebay')}
+                        className={`p-4 rounded-xl border-2 transition-all ${platform === 'ebay'
+                            ? 'border-lime-500 bg-lime-50 dark:bg-lime-900/20'
+                            : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-forest-900/40'
+                            }`}
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="text-3xl">🏷️</div>
+                            <div className="text-left">
+                                <div className="font-bold text-gray-900 dark:text-white">eBay</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">190+ countries</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
             </div>
 
-            {/* Fetch Button */}
-            <div className="flex justify-center">
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="flex gap-3">
+                <div className="flex-1 relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                        type="text"
+                        value={keyword}
+                        onChange={(e) => setKeyword(e.target.value)}
+                        placeholder="Search for products (e.g., winter boots, laptop stand...)"
+                        className="w-full pl-12 pr-4 py-4 bg-white dark:bg-forest-900 border border-gray-300 dark:border-forest-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-lime-500 focus:border-transparent text-lg"
+                        disabled={loading}
+                    />
+                </div>
                 <Button
-                    onClick={fetchProducts}
-                    disabled={loading}
-                    className="w-full sm:w-auto h-11 md:h-12 px-6 md:px-8 shadow-lg shadow-lime-500/20 text-sm md:text-base"
+                    type="submit"
+                    disabled={loading || !keyword.trim()}
+                    className="px-8 py-4 text-lg shadow-lg shadow-lime-500/20"
                 >
                     {loading ? (
                         <>
-                            <Loader2 className="w-4 h-4 md:w-5 md:h-5 mr-2 animate-spin" />
-                            <span className="hidden sm:inline">Fetching Products...</span>
-                            <span className="sm:hidden">Fetching...</span>
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                            Searching...
                         </>
                     ) : (
-                        <>
-                            <Search className="w-4 h-4 md:w-5 md:h-5 mr-2" />
-                            <span className="hidden sm:inline">Fetch Trending from {selectedPlatform}</span>
-                            <span className="sm:hidden">Fetch from {selectedPlatform}</span>
-                        </>
+                        'Search'
                     )}
                 </Button>
-            </div>
+            </form>
+
+            {/* Loading Message */}
+            {loading && (
+                <div className="text-center p-6 bg-lime-50 dark:bg-lime-900/20 rounded-xl border border-lime-200 dark:border-lime-800">
+                    <Loader2 className="w-8 h-8 text-lime-600 dark:text-lime-400 mx-auto mb-3 animate-spin" />
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                        🔍 Scraping {platform === 'ebay' ? 'eBay' : 'Amazon'}... This takes about 20 seconds
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                        Results will be cached for 48 hours for instant access
+                    </p>
+                </div>
+            )}
 
             {/* Error */}
             {error && (
-                <div className="p-3 md:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-                    <p className="text-xs md:text-sm text-red-800 dark:text-red-400">{error}</p>
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                    <p className="text-sm text-red-800 dark:text-red-400">{error}</p>
                 </div>
             )}
 
             {/* Stats */}
             {products.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
-                    <div className="bg-white dark:bg-forest-900/40 border border-gray-200 dark:border-forest-800 rounded-xl md:rounded-2xl p-4 md:p-6 hover:shadow-xl transition-shadow">
-                        <div className="flex items-center gap-3 md:gap-4">
-                            <div className="w-10 h-10 md:w-12 md:h-12 bg-lime-100 dark:bg-lime-900/30 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0">
-                                <Package className="w-5 h-5 md:w-6 md:h-6 text-lime-600 dark:text-lime-400" />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-white dark:bg-forest-900/40 border border-gray-200 dark:border-forest-800 rounded-2xl p-6 hover:shadow-xl transition-shadow">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-lime-100 dark:bg-lime-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <Package className="w-6 h-6 text-lime-600 dark:text-lime-400" />
                             </div>
                             <div>
-                                <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{totalProducts}</p>
-                                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">Total Products</p>
+                                <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalProducts}</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Total Products</p>
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-forest-900/40 border border-gray-200 dark:border-forest-800 rounded-xl md:rounded-2xl p-4 md:p-6 hover:shadow-xl transition-shadow">
-                        <div className="flex items-center gap-3 md:gap-4">
-                            <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0">
-                                <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-blue-600 dark:text-blue-400" />
+                    <div className="bg-white dark:bg-forest-900/40 border border-gray-200 dark:border-forest-800 rounded-2xl p-6 hover:shadow-xl transition-shadow">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                             </div>
                             <div>
-                                <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{avgDemand}</p>
-                                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">Avg Demand</p>
+                                <p className="text-2xl font-bold text-gray-900 dark:text-white">${avgPrice}</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Avg Price</p>
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-forest-900/40 border border-gray-200 dark:border-forest-800 rounded-xl md:rounded-2xl p-4 md:p-6 hover:shadow-xl transition-shadow">
-                        <div className="flex items-center gap-3 md:gap-4">
-                            <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0">
-                                <Star className="w-5 h-5 md:w-6 md:h-6 text-purple-600 dark:text-purple-400" />
+                    <div className="bg-white dark:bg-forest-900/40 border border-gray-200 dark:border-forest-800 rounded-2xl p-6 hover:shadow-xl transition-shadow">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <Star className="w-6 h-6 text-green-600 dark:text-green-400" />
                             </div>
                             <div>
-                                <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{highPotential}</p>
-                                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">High Potential</p>
+                                <p className="text-2xl font-bold text-gray-900 dark:text-white">{highOpportunity}</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Opportunities</p>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Category Filter */}
-            {products.length > 0 && categories.length > 1 && (
-                <div className="flex items-center gap-2 md:gap-3 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-                    <Filter className="w-4 h-4 md:w-5 md:h-5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
-                    {categories.map((category) => (
-                        <button
-                            key={category}
-                            onClick={() => setSelectedCategory(category)}
-                            className={clsx(
-                                "px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap transition-all",
-                                selectedCategory === category
-                                    ? "bg-lime-500 text-white shadow-lg shadow-lime-500/20"
-                                    : "bg-white dark:bg-forest-900/40 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-forest-800 hover:border-lime-300"
-                            )}
-                        >
-                            {category}
-                        </button>
-                    ))}
+            {/* Results */}
+            {products.length > 0 && (
+                <div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                        Found {products.length} Products
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {products.map((product) => (
+                            <ProductCard
+                                key={product.id}
+                                product={product}
+                                onCalculateProfit={() => handleCalculateProfit(product)}
+                            />
+                        ))}
+                    </div>
                 </div>
             )}
 
-            {/* Products Grid */}
-            {filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                    {filteredProducts.map((product, i) => (
-                        <ProductCard key={i} product={product} />
-                    ))}
-                </div>
-            ) : !loading && products.length === 0 && (
-                <div className="text-center py-12 md:py-20 bg-white dark:bg-forest-900/20 rounded-xl md:rounded-2xl border border-gray-200 dark:border-forest-800">
-                    <Search className="w-12 h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-3 md:mb-4" />
-                    <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-2">
-                        Ready to Discover Trends?
+            {/* Empty State */}
+            {!loading && products.length === 0 && !error && (
+                <div className="text-center py-20 bg-white dark:bg-forest-900/20 rounded-2xl border border-gray-200 dark:border-forest-800">
+                    <Search className="w-16 h-16 text-gray-300 dark:text-gray-700 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                        Search for products to get started
                     </h3>
-                    <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 px-4">
-                        Select a platform and click "Fetch Trending" to get started
+                    <p className="text-gray-500 dark:text-gray-500 mb-4">
+                        Try searching for "wireless earbuds", "yoga mat", or "phone case"
                     </p>
+                    <div className="flex flex-wrap justify-center gap-2 mt-4">
+                        {['laptop stand', 'wireless earbuds', 'yoga mat', 'phone case'].map((suggestion) => (
+                            <button
+                                key={suggestion}
+                                onClick={() => setKeyword(suggestion)}
+                                className="px-4 py-2 bg-gray-100 dark:bg-forest-800 hover:bg-lime-100 dark:hover:bg-lime-900/30 text-gray-700 dark:text-gray-300 rounded-lg text-sm transition-colors"
+                            >
+                                {suggestion}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             )}
+
+            {/* Profit Calculator Modal */}
+            <ProfitCalculatorModal
+                isOpen={showCalculator}
+                onClose={() => setShowCalculator(false)}
+                product={selectedProduct}
+            />
         </div>
     );
 }

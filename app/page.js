@@ -11,7 +11,7 @@ export default function LandingPage() {
   const faqs = [
     {
       q: "How does TrendHawk find trending products?",
-      a: "We use advanced web scraping technology to analyze real-time data from Amazon, eBay, AliExpress, Etsy, and Daraz. Our algorithms identify products with high demand and low competition."
+      a: "We use advanced technology to analyze real-time data from Amazon and eBay. Our algorithms identify products with high demand and low competition."
     },
     {
       q: "Can I cancel my subscription anytime?",
@@ -19,7 +19,7 @@ export default function LandingPage() {
     },
     {
       q: "Do you offer a free trial?",
-      a: "Yes! We offer a free plan with 5 searches per day so you can test TrendHawk before upgrading to a paid plan."
+      a: "Yes! We offer a free plan with 5 searches per month so you can test TrendHawk before upgrading to a paid plan."
     },
     {
       q: "How accurate is the demand score?",
@@ -208,9 +208,9 @@ export default function LandingPage() {
                       <item.icon className="w-8 h-8" />
                     </div>
 
-                    {/* Step Number - White with Glass Background */}
+                    {/* Step Number - Better Visibility */}
                     <div className="flex items-center justify-center mb-3">
-                      <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/20 text-white font-bold text-base shadow-lg">
+                      <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-lg shadow-lg">
                         {item.step}
                       </span>
                     </div>
@@ -236,17 +236,17 @@ export default function LandingPage() {
               <div className="p-8 rounded-3xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/20 relative">
                 <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Basic</h3>
                 <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-4xl font-extrabold text-lime-600 dark:text-lime-500">$10</span>
+                  <span className="text-4xl font-extrabold text-lime-600 dark:text-lime-500">$9</span>
                   <span className="text-gray-500">/month</span>
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 mb-8">Perfect for beginners just starting their research.</p>
 
                 <ul className="space-y-4 mb-8">
-                  <Feature text="50 Searches per day" />
-                  <Feature text="Save up to 100 products" />
-                  <Feature text="Basic Analysis Data" />
-                  <Feature text="3 Platforms" />
-                  <Feature text="Deep Analysis" cross />
+                  <Feature text="100 searches per month" />
+                  <Feature text="Live real-time data" />
+                  <Feature text="Auto-link to suppliers" />
+                  <Feature text="Export to CSV" />
+                  <Feature text="API Access" cross />
                 </ul>
 
                 <Link href="/signup?plan=basic">
@@ -259,16 +259,17 @@ export default function LandingPage() {
                 <div className="absolute top-0 right-0 bg-lime-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">POPULAR</div>
                 <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Pro Plan</h3>
                 <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-4xl font-extrabold text-lime-600 dark:text-lime-500">$30</span>
+                  <span className="text-4xl font-extrabold text-lime-600 dark:text-lime-500">$29</span>
                   <span className="text-gray-500">/month</span>
                 </div>
                 <p className="text-gray-500 dark:text-gray-400 mb-8">For serious dropshippers scaling their business.</p>
 
                 <ul className="space-y-4 mb-8">
-                  <Feature text="Unlimited Searches" check />
-                  <Feature text="Unlimited Saved Products" check />
-                  <Feature text="Deep Analysis (Revenue)" check />
-                  <Feature text="All 5 Platforms" check />
+                  <Feature text="3,000 searches per month" check />
+                  <Feature text="Live real-time data" check />
+                  <Feature text="Auto-link to suppliers" check />
+                  <Feature text="Export to CSV" check />
+                  <Feature text="API access (50/day)" check />
                   <Feature text="Priority Support" check />
                 </ul>
 
@@ -302,15 +303,17 @@ export default function LandingPage() {
           </div>
 
           {/* CTA Section */}
-          <div className="py-20 px-8 rounded-3xl bg-gradient-to-r from-lime-500 to-emerald-600 text-white mb-20">
+          <div className="py-20 px-8 rounded-3xl bg-gradient-to-r from-lime-500 to-emerald-600 text-white mb-20 text-center">
             <h2 className="text-4xl font-extrabold mb-4">Ready to Find Your Next Winning Product?</h2>
             <p className="text-lime-50 mb-8 text-lg max-w-2xl mx-auto">Start discovering trending products today with our powerful research tools</p>
-            <Link href="/signup">
-              <Button className="h-14 px-8 text-lg bg-white text-lime-600 hover:bg-gray-100">
-                Start Free Trial
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </Link>
+            <div className="flex justify-center">
+              <Link href="/signup">
+                <Button className="h-14 px-8 text-lg bg-white text-lime-600 hover:bg-gray-100">
+                  Start Free Trial
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </main>

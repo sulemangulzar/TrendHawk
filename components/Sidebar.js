@@ -72,17 +72,17 @@ export default function Sidebar() {
 
             {/* Upgrade CTA */}
             <div className="px-3 mb-3">
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-lime-500/10 to-emerald-500/10 dark:from-lime-500/5 dark:to-emerald-500/5 border border-lime-500/20 dark:border-lime-500/10">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 border-2 border-lime-500/30 dark:border-lime-500/20">
                     <div className="flex items-center gap-2 mb-2">
-                        <Crown className="w-4 h-4 text-lime-600 dark:text-lime-400" />
-                        <span className="text-sm font-bold text-lime-700 dark:text-lime-400">Pro Plan</span>
+                        <Crown className="w-5 h-5 text-lime-600 dark:text-lime-400" />
+                        <span className="text-sm font-bold text-lime-700 dark:text-lime-300">Upgrade to Pro</span>
                     </div>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-                        Unlock unlimited searches & deep analysis
+                    <p className="text-xs text-gray-700 dark:text-gray-300 mb-3 font-medium">
+                        3,000 searches/month + API access
                     </p>
                     <Link href="/pricing">
-                        <button className="w-full py-2 bg-lime-500 hover:bg-lime-600 text-white text-xs font-bold rounded-lg transition-colors">
-                            View Plans
+                        <button className="w-full py-2.5 bg-lime-500 hover:bg-lime-600 dark:bg-lime-600 dark:hover:bg-lime-700 text-white text-sm font-bold rounded-xl transition-all hover:scale-105 shadow-lg shadow-lime-500/25">
+                            View Plans →
                         </button>
                     </Link>
                 </div>
@@ -102,10 +102,10 @@ export default function Sidebar() {
                 {/* User Info */}
                 <div className="px-3 py-2">
                     <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                        {user?.username || 'User'}
+                        {user?.email?.split('@')[0] || user?.user_metadata?.name || 'User'}
                     </p>
                     <p className="text-xs text-lime-600 dark:text-lime-400 font-medium truncate">
-                        {user?.profile?.plan?.toUpperCase() || 'FREE'} Plan
+                        {user?.user_metadata?.subscription_plan?.toUpperCase() || 'FREE'} Plan
                     </p>
                 </div>
 

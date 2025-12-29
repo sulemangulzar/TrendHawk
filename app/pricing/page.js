@@ -1,11 +1,16 @@
 "use client";
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Check, Zap, Crown, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui';
+import { useAuth } from '@/context/AuthContext';
 
 export default function PricingPage() {
+    const { user } = useAuth();
+    const router = useRouter();
     const [billingCycle, setBillingCycle] = useState('monthly');
+    const [loadingPlan, setLoadingPlan] = useState(null);
 
     const plans = [
         {
@@ -13,10 +18,17 @@ export default function PricingPage() {
             price: billingCycle === 'monthly' ? 0 : 0,
             description: 'Perfect for trying out TrendHawk',
             features: [
-                '5 searches per day',
-                'Basic product metrics',
-                'Save up to 10 products',
-                'Email support'
+                '5 product searches per month',
+                'Cached data only',
+                'Profit calculator',
+                'Unlimited favorites',
+                'Basic analytics'
+            ],
+            limitations: [
+                'No supplier finder',
+                'No CSV export',
+                'No API access',
+                'No support'
             ],
             cta: 'Current Plan',
             href: '/dashboard',
@@ -25,15 +37,16 @@ export default function PricingPage() {
         },
         {
             name: 'Basic',
-            price: billingCycle === 'monthly' ? 10 : 96,
+            price: billingCycle === 'monthly' ? 9 : 86,
             description: 'Great for casual sellers',
             features: [
-                '50 searches per day',
-                'Advanced analytics',
-                'Save unlimited products',
+                '100 product searches per month',
+                'Live real-time data',
+                'Auto-link to verified suppliers',
+                'Profit calculator',
                 'Export to CSV',
-                'Priority email support',
-                'Product alerts'
+                'Unlimited favorites',
+                'Email support'
             ],
             cta: 'Upgrade to Basic',
             href: '/checkout?plan=basic',
@@ -41,23 +54,59 @@ export default function PricingPage() {
         },
         {
             name: 'Pro',
-            price: billingCycle === 'monthly' ? 30 : 288,
+            price: billingCycle === 'monthly' ? 29 : 278,
             description: 'For serious product researchers',
             features: [
-                'Unlimited searches',
-                'Real-time data updates',
-                'Advanced competitor analysis',
-                'API access',
-                'Custom reports',
+                '3,000 product searches per month',
+                'Live real-time data',
+                'Auto-link to verified suppliers',
+                'Profit calculator',
+                'Export to CSV',
+                'API access (50 requests/day)',
                 'Priority support',
-                'Early access to new features',
-                'Dedicated account manager'
+                'Advanced analytics',
+                'Early access to new features'
             ],
             cta: 'Upgrade to Pro',
             href: '/checkout?plan=pro',
             popular: true
         }
     ];
+
+    const handleUpgrade = async (plan) => {
+        if (!user) {
+            router.push('/login');
+            return;
+        }
+
+        setLoadingPlan(plan);
+
+        try {
+            const response = await fetch('/api/create-checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    plan: plan,
+                    userId: user.id,
+                    userEmail: user.email,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.checkoutUrl) {
+                window.location.href = data.checkoutUrl;
+            } else {
+                throw new Error('No checkout URL returned');
+            }
+        } catch (error) {
+            console.error('Error creating checkout:', error);
+            alert('Failed to start checkout. Please try again.');
+            setLoadingPlan(null);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-black font-poppins">
@@ -90,8 +139,8 @@ export default function PricingPage() {
                         <button
                             onClick={() => setBillingCycle('monthly')}
                             className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${billingCycle === 'monthly'
-                                    ? 'bg-lime-500 text-white'
-                                    : 'text-gray-700 dark:text-gray-300'
+                                ? 'bg-lime-500 text-white'
+                                : 'text-gray-700 dark:text-gray-300'
                                 }`}
                         >
                             Monthly
@@ -99,8 +148,8 @@ export default function PricingPage() {
                         <button
                             onClick={() => setBillingCycle('yearly')}
                             className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${billingCycle === 'yearly'
-                                    ? 'bg-lime-500 text-white'
-                                    : 'text-gray-700 dark:text-gray-300'
+                                ? 'bg-lime-500 text-white'
+                                : 'text-gray-700 dark:text-gray-300'
                                 }`}
                         >
                             Yearly
@@ -117,8 +166,8 @@ export default function PricingPage() {
                         <div
                             key={i}
                             className={`relative bg-white dark:bg-forest-900/40 border-2 rounded-2xl p-8 ${plan.popular
-                                    ? 'border-lime-500 shadow-2xl shadow-lime-500/20'
-                                    : 'border-gray-200 dark:border-forest-800'
+                                ? 'border-lime-500 shadow-2xl shadow-lime-500/20'
+                                : 'border-gray-200 dark:border-forest-800'
                                 }`}
                         >
                             {plan.popular && (
@@ -157,18 +206,29 @@ export default function PricingPage() {
                                 ))}
                             </ul>
 
-                            <Link href={plan.href} className="block">
+
+                            {plan.disabled ? (
                                 <Button
-                                    className={`w-full ${plan.popular
-                                            ? 'shadow-lg shadow-lime-500/25'
-                                            : ''
-                                        }`}
-                                    variant={plan.popular ? 'default' : 'outline'}
-                                    disabled={plan.disabled}
+                                    className="w-full"
+                                    variant="outline"
+                                    disabled={true}
                                 >
                                     {plan.cta}
                                 </Button>
-                            </Link>
+                            ) : (
+                                <Button
+                                    onClick={() => handleUpgrade(plan.name.toLowerCase())}
+                                    className={`w-full ${plan.popular
+                                        ? 'shadow-lg shadow-lime-500/25'
+                                        : ''
+                                        }`}
+                                    variant={plan.popular ? 'default' : 'outline'}
+                                    disabled={loadingPlan === plan.name.toLowerCase()}
+                                >
+                                    {loadingPlan === plan.name.toLowerCase() ? 'Loading...' : plan.cta}
+                                </Button>
+                            )}
+
                         </div>
                     ))}
                 </div>
