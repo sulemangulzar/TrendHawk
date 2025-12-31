@@ -6,6 +6,7 @@ export function Button({ children, className, variant = 'primary', ...props }) {
 
     const variants = {
         primary: "bg-lime-500 text-white hover:bg-lime-600 shadow-lg shadow-lime-500/20 active:shadow-none",
+        premium: "bg-gradient-to-r from-lime-500 to-emerald-600 text-white hover:from-lime-600 hover:to-emerald-700 shadow-xl shadow-lime-500/25 hover:shadow-lime-500/40 border-none",
         secondary: "bg-white dark:bg-forest-900 border border-gray-200 dark:border-forest-700 text-forest-700 dark:text-forest-200 hover:bg-gray-50 dark:hover:bg-forest-800",
         outline: "border-2 border-lime-500 text-lime-600 dark:text-lime-400 hover:bg-lime-50 dark:hover:bg-lime-900/10",
         ghost: "text-gray-500 dark:text-forest-400 hover:text-lime-600 dark:hover:text-lime-400 hover:bg-lime-50 dark:hover:bg-forest-800/50"

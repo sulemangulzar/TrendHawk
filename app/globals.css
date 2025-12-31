@@ -78,6 +78,18 @@ select {
   /* Firefox */
 }
 
+/* Remove default number input spinners */
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+.no-spinner {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
 /* Custom scrollbar styling (optional) */
 ::-webkit-scrollbar {
   width: 8px;

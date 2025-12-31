@@ -1,3 +1,4 @@
+// Forced reload for candidate fix - 2025-12-31
 import { Poppins } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
@@ -10,8 +11,19 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-  title: 'TrendHawk - Find Trending Products',
-  description: 'Discover trending products across multiple platforms with powerful analytics and insights.',
+  title: 'TrendHawk - Professional E-commerce Product Research',
+  description: 'Find winning products across Amazon, eBay, and more. Use AI-driven analytics, profit simulators, and daily action plans to scale your e-commerce business.',
+  keywords: ['dropshipping', 'product research', 'ecommerce', 'amazon trends', 'ebay analytics', 'winning products'],
+  authors: [{ name: 'TrendHawk Team' }],
+  viewport: 'width=device-width, initial-scale=1',
+  openGraph: {
+    title: 'TrendHawk - Find Winning Products Before They Go Viral',
+    description: 'Professional product research for e-commerce sellers.',
+    url: 'https://trendhawk.com',
+    siteName: 'TrendHawk',
+    locale: 'en_US',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({ children }) {

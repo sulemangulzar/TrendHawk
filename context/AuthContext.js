@@ -67,13 +67,64 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updateUsername = async (newUsername) => {
+        try {
+            const { data, error } = await supabase.auth.updateUser({
+                data: { username: newUsername }
+            });
+
+            if (error) return { success: false, error: error.message };
+
+            // Refresh user state
+            setUser(data.user);
+            return { success: true };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    };
+
+    const updatePassword = async (newPassword) => {
+        try {
+            const { error } = await supabase.auth.updateUser({
+                password: newPassword
+            });
+
+            if (error) return { success: false, error: error.message };
+            return { success: true };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    };
+
+    const updateEmail = async (newEmail) => {
+        try {
+            const { error } = await supabase.auth.updateUser({
+                email: newEmail
+            });
+
+            if (error) return { success: false, error: error.message };
+            return { success: true, message: 'Confirmation link sent to your new email.' };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    };
+
     const logout = async () => {
         await supabase.auth.signOut();
         router.push('/login');
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+        <AuthContext.Provider value={{
+            user,
+            loading,
+            login,
+            register,
+            logout,
+            updateUsername,
+            updatePassword,
+            updateEmail
+        }}>
             {children}
         </AuthContext.Provider>
     );

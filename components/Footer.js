@@ -44,16 +44,23 @@ export default function Footer() {
 
                     {/* Product Links */}
                     <div>
-                        <h3 className="text-white font-bold text-lg mb-6">Product</h3>
+                        <h3 className="text-white font-bold text-lg mb-6 tracking-tight">Product</h3>
                         <ul className="space-y-4">
-                            {['Features', 'Pricing', 'Dashboard', 'Analytics', 'Saved Products', 'API Access'].map((item) => (
-                                <li key={item}>
+                            {[
+                                { name: 'Analyzer', href: '/dashboard/analyze' },
+                                { name: 'Pricing', href: '/pricing' },
+                                { name: 'Dashboard', href: '/dashboard' },
+                                { name: 'Daily Actions', href: '/dashboard/daily' },
+                                { name: 'Candidates', href: '/dashboard/candidates' },
+                                { name: 'Simulator', href: '/dashboard/simulator' }
+                            ].map((item) => (
+                                <li key={item.name}>
                                     <Link
-                                        href="#"
-                                        className="text-gray-400 hover:text-lime-400 transition-colors text-sm flex items-center gap-2 group"
+                                        href={item.href}
+                                        className="text-gray-400 hover:text-lime-400 transition-colors text-sm flex items-center gap-2 group font-medium"
                                     >
-                                        <span className="w-1 h-1 bg-lime-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        {item}
+                                        <span className="w-1 h-1 bg-lime-500 rounded-full opacity-0 group-hover:opacity-100 transition-all transform group-hover:scale-150" />
+                                        {item.name}
                                     </Link>
                                 </li>
                             ))}
@@ -62,16 +69,22 @@ export default function Footer() {
 
                     {/* Company Links */}
                     <div>
-                        <h3 className="text-white font-bold text-lg mb-6">Company</h3>
+                        <h3 className="text-white font-bold text-lg mb-6 tracking-tight">Support</h3>
                         <ul className="space-y-4">
-                            {['About Us', 'Blog', 'Careers', 'Press Kit', 'Partners', 'Contact'].map((item) => (
-                                <li key={item}>
+                            {[
+                                { name: 'Settings', href: '/dashboard/settings' },
+                                { name: 'Log In', href: '/login' },
+                                { name: 'Sign Up', href: '/signup' },
+                                { name: 'Terms of Service', href: '#' },
+                                { name: 'Privacy Policy', href: '#' }
+                            ].map((item) => (
+                                <li key={item.name}>
                                     <Link
-                                        href="#"
-                                        className="text-gray-400 hover:text-lime-400 transition-colors text-sm flex items-center gap-2 group"
+                                        href={item.href}
+                                        className="text-gray-400 hover:text-lime-400 transition-colors text-sm flex items-center gap-2 group font-medium"
                                     >
-                                        <span className="w-1 h-1 bg-lime-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        {item}
+                                        <span className="w-1 h-1 bg-lime-500 rounded-full opacity-0 group-hover:opacity-100 transition-all transform group-hover:scale-150" />
+                                        {item.name}
                                     </Link>
                                 </li>
                             ))}

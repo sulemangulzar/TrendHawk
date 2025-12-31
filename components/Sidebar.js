@@ -1,11 +1,9 @@
-"use client";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import {
-    TrendingUp, Home, Heart, Settings, LogOut,
-    BarChart3, Bell, Moon, Sun, Crown, Sparkles
+    TrendingUp, LogOut, Moon, Sun, Crown
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -15,11 +13,14 @@ export default function Sidebar() {
     const { theme, toggleTheme } = useTheme();
 
     const navigation = [
-        { name: 'Dashboard', href: '/dashboard', icon: Home },
-        { name: 'Saved Products', href: '/dashboard/saved', icon: Heart },
-        { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
-        { name: 'Alerts', href: '/dashboard/alerts', icon: Bell },
-        { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+        { name: 'Dashboard', href: '/dashboard', icon: '📊' },
+        { name: 'Daily Action', href: '/dashboard/daily', icon: '🎯' },
+        { name: 'Profit Simulator', href: '/dashboard/simulator', icon: '🎮' },
+        { name: 'Explore', href: '/dashboard/explore', icon: '🔍' },
+        { name: 'Analyze', href: '/dashboard/analyze', icon: '⚡' },
+        { name: 'Candidates', href: '/dashboard/candidates', icon: '⭐' },
+        { name: 'Insights', href: '/dashboard/insights', icon: '🧠' },
+        { name: 'Alerts', href: '/dashboard/alerts', icon: '🔔' },
     ];
 
     const isActive = (href) => pathname === href;
@@ -27,22 +28,31 @@ export default function Sidebar() {
     return (
         <div className="h-full flex flex-col bg-white dark:bg-forest-950 border-r border-gray-200 dark:border-forest-800 font-poppins">
             {/* Logo */}
-            <div className="p-6 border-b border-gray-200 dark:border-forest-800">
-                <Link href="/dashboard" className="flex items-center gap-3 group">
-                    <div className="w-10 h-10 bg-lime-500 rounded-xl flex items-center justify-center shadow-lg shadow-lime-500/20 group-hover:scale-105 transition-transform">
-                        <TrendingUp className="w-6 h-6 text-white" />
+            <div className="p-4 border-b border-gray-200 dark:border-forest-800">
+                <Link
+                    href="/dashboard"
+                    onClick={() => {
+                        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                            const event = new CustomEvent('closeSidebar');
+                            window.dispatchEvent(event);
+                        }
+                    }}
+                    className="flex items-center gap-2.5 group"
+                >
+                    <div className="w-9 h-9 bg-lime-500 rounded-lg flex items-center justify-center shadow-lg shadow-lime-500/20 group-hover:scale-105 transition-transform">
+                        <TrendingUp className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                        <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-none">
                             TrendHawk
                         </h1>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Research Tool</p>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider font-bold">Loss Prevention</p>
                     </div>
                 </Link>
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 px-3 py-4 space-y-1">
+            <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto scrollbar-hide">
                 {navigation.map((item) => {
                     const active = isActive(item.href);
                     return (
@@ -57,13 +67,13 @@ export default function Sidebar() {
                                 }
                             }}
                             className={clsx(
-                                "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm font-medium",
+                                "flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm font-medium",
                                 active
-                                    ? "bg-lime-500 text-white shadow-lg shadow-lime-500/20"
-                                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-forest-900/50"
+                                    ? "bg-lime-500 text-white shadow-md shadow-lime-500/20"
+                                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-forest-900/50"
                             )}
                         >
-                            <item.icon className="w-5 h-5" />
+                            <span className="text-base">{item.icon}</span>
                             {item.name}
                         </Link>
                     );
@@ -71,52 +81,89 @@ export default function Sidebar() {
             </nav>
 
             {/* Upgrade CTA */}
-            <div className="px-3 mb-3">
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 border-2 border-lime-500/30 dark:border-lime-500/20">
-                    <div className="flex items-center gap-2 mb-2">
-                        <Crown className="w-5 h-5 text-lime-600 dark:text-lime-400" />
-                        <span className="text-sm font-bold text-lime-700 dark:text-lime-300">Upgrade to Pro</span>
+            <div className="px-3 mb-4">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-lime-500/10 to-emerald-500/10 dark:from-lime-500/20 dark:to-emerald-500/20 border border-lime-500/20 relative overflow-hidden group">
+                    <div className="absolute -right-4 -top-4 w-16 h-16 bg-lime-500/10 rounded-full blur-2xl group-hover:bg-lime-500/20 transition-colors" />
+
+                    <div className="flex items-center gap-2 mb-2 relative z-10">
+                        <div className="p-1.5 bg-lime-500 rounded-lg shadow-sm shadow-lime-500/20">
+                            <Crown className="w-3.5 h-3.5 text-white" />
+                        </div>
+                        <span className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">Pro Plan</span>
                     </div>
-                    <p className="text-xs text-gray-700 dark:text-gray-300 mb-3 font-medium">
-                        3,000 searches/month + API access
+
+                    <p className="text-[11px] text-gray-600 dark:text-gray-400 mb-3 leading-snug relative z-10">
+                        Unlock 3,000 searches and full API data access.
                     </p>
-                    <Link href="/pricing">
-                        <button className="w-full py-2.5 bg-lime-500 hover:bg-lime-600 dark:bg-lime-600 dark:hover:bg-lime-700 text-white text-sm font-bold rounded-xl transition-all hover:scale-105 shadow-lg shadow-lime-500/25">
-                            View Plans →
+
+                    <Link
+                        href="/pricing"
+                        className="relative z-10 block"
+                        onClick={() => {
+                            if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                                const event = new CustomEvent('closeSidebar');
+                                window.dispatchEvent(event);
+                            }
+                        }}
+                    >
+                        <button className="w-full py-2.5 bg-lime-500 hover:bg-lime-600 active:scale-95 text-white text-[11px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md shadow-lime-500/20">
+                            Upgrade Now
                         </button>
                     </Link>
                 </div>
             </div>
 
             {/* Bottom Section */}
-            <div className="p-3 border-t border-gray-200 dark:border-forest-800 space-y-2">
+            <div className="p-2 border-t border-gray-200 dark:border-forest-800 space-y-1">
+                {/* Secondary Nav */}
+                <Link
+                    href="/dashboard/settings"
+                    onClick={() => {
+                        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                            const event = new CustomEvent('closeSidebar');
+                            window.dispatchEvent(event);
+                        }
+                    }}
+                    className={clsx(
+                        "flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm font-medium",
+                        isActive('/dashboard/settings')
+                            ? "bg-lime-500 text-white shadow-md shadow-lime-500/20"
+                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-forest-900/50"
+                    )}
+                >
+                    <span className="text-base">⚙️</span>
+                    Settings
+                </Link>
+
+                <div className="h-px bg-gray-100 dark:bg-forest-800 my-1 mx-2" />
+
                 {/* Theme Toggle */}
                 <button
                     onClick={toggleTheme}
-                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-forest-900/50 transition-colors"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-forest-900/30 transition-colors"
                 >
                     <span>Theme</span>
-                    {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-gray-700 dark:text-gray-400" />}
+                    {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-500" /> : <Moon className="w-3.5 h-3.5 text-gray-700" />}
                 </button>
 
                 {/* User Info */}
-                <div className="px-3 py-2">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                        {user?.email?.split('@')[0] || user?.user_metadata?.name || 'User'}
-                    </p>
-                    <p className="text-xs text-lime-600 dark:text-lime-400 font-medium truncate">
-                        {user?.user_metadata?.subscription_plan?.toUpperCase() || 'FREE'} Plan
-                    </p>
+                <div className="px-3 py-1.5 flex items-center justify-between bg-gray-50 dark:bg-forest-900/30 rounded-xl mt-1">
+                    <div className="truncate">
+                        <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                            {user?.email?.split('@')[0] || 'User'}
+                        </p>
+                        <p className="text-[10px] text-lime-600 dark:text-lime-400 font-bold uppercase tracking-tight">
+                            {user?.user_metadata?.subscription_plan || 'FREE'} PLAN
+                        </p>
+                    </div>
+                    <button
+                        onClick={logout}
+                        className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        title="Logout"
+                    >
+                        <LogOut className="w-4 h-4" />
+                    </button>
                 </div>
-
-                {/* Logout */}
-                <button
-                    onClick={logout}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                >
-                    <LogOut className="w-4 h-4" />
-                    Logout
-                </button>
             </div>
         </div>
     );

@@ -38,7 +38,7 @@ export default function LandingPage() {
 
       {/* Navbar */}
       <nav className="border-b border-gray-100 dark:border-gray-900/50 backdrop-blur-md sticky top-0 z-50 bg-white/80 dark:bg-black/80">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div className="max-w-screen-2xl mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-lime-500 rounded-xl flex items-center justify-center shadow-lg shadow-lime-500/20 text-white transform hover:rotate-6 transition-transform">
               <TrendingUp className="w-6 h-6" />
@@ -52,14 +52,14 @@ export default function LandingPage() {
             >
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-            <div className="hidden md:flex items-center gap-6">
-              <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-lime-500 font-medium transition-colors">Features</a>
+            <div className="hidden md:flex items-center gap-8">
+              <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-lime-500 font-medium transition-colors">Analyzer</a>
               <a href="#pricing" className="text-gray-600 dark:text-gray-300 hover:text-lime-500 font-medium transition-colors">Pricing</a>
               <Link href="/login" className="text-gray-600 dark:text-gray-300 hover:text-lime-500 dark:hover:text-lime-400 font-medium transition-colors">
-                Sign In
+                Log In
               </Link>
               <Link href="/signup">
-                <Button className="px-6 py-2.5 text-sm h-auto shadow-lime-500/25">Get Started</Button>
+                <Button className="px-8 py-3 text-sm h-auto shadow-lime-500/25 font-bold">Try Decision Engine</Button>
               </Link>
             </div>
           </div>
@@ -68,49 +68,68 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <main className="flex-1">
-        <div className="max-w-7xl mx-auto px-6 pt-20 pb-32 text-center">
+        <div className="max-w-screen-xl mx-auto px-6 pt-24 pb-32 text-center 2xl:pt-32">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-lime-50 dark:bg-lime-900/10 border border-lime-100 dark:border-lime-900/30 text-lime-600 dark:text-lime-400 text-sm font-semibold mx-auto mb-8">
-              <span className="relative flex h-2 w-2">
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-lime-50 dark:bg-lime-900/10 border border-lime-100 dark:border-lime-900/30 text-lime-600 dark:text-lime-400 text-sm font-black mx-auto mb-10 shadow-sm">
+              <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-lime-500"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-lime-500"></span>
               </span>
-              New: Real-time AliExpress Scraping
+              SMART DECISION ENGINE IS LIVE
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-tight text-gray-900 dark:text-white">
-              Find Winning Products <br />
+            <h1 className="text-6xl md:text-8xl 2xl:text-9xl font-black tracking-tighter mb-8 leading-[0.9] text-gray-900 dark:text-white">
+              Stop Guessing. <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-500 to-emerald-600 dark:from-lime-400 dark:to-emerald-500">
-                Before They Go Viral
+                Start Validating.
               </span>
             </h1>
 
-            <p className="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-              Instantly scrape trending products from Amazon, eBay, AliExpress and more.
-              Stop guessing and start selling what people actually want.
+            <p className="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed font-medium">
+              The world's first <span className="text-gray-900 dark:text-white font-bold underline decoration-lime-500/30">Loss Prevention Engine</span> for E-commerce.
+              Find winning trends and simulate profit margins before you spend a single dollar on ads.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-24">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-24">
               <Link href="/signup" className="w-full sm:w-auto">
-                <Button className="h-14 px-8 text-lg w-full sm:w-auto transform hover:scale-105 transition-transform">
-                  Start Free Trial
-                  <ArrowRight className="w-5 h-5 ml-2" />
+                <Button className="h-16 px-12 text-xl w-full sm:w-auto transform hover:scale-105 transition-all shadow-xl shadow-lime-500/20 font-black">
+                  Start Researching Free
+                  <ArrowRight className="w-6 h-6 ml-2" />
                 </Button>
               </Link>
+              <div className="flex -space-x-4">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="w-12 h-12 rounded-full border-4 border-white dark:border-black bg-gray-200 overflow-hidden shadow-sm">
+                    <img src={`https://i.pravatar.cc/150?u=${i}`} alt="user" />
+                  </div>
+                ))}
+                <div className="flex items-center ml-4 pl-4 border-l border-gray-200 dark:border-gray-800">
+                  <div className="text-left">
+                    <div className="flex gap-1 text-amber-400">
+                      <Star className="w-4 h-4 fill-current" />
+                      <Star className="w-4 h-4 fill-current" />
+                      <Star className="w-4 h-4 fill-current" />
+                      <Star className="w-4 h-4 fill-current" />
+                      <Star className="w-4 h-4 fill-current" />
+                    </div>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Join 4,000+ Sellers</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </motion.div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-32">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-40 max-w-screen-xl mx-auto">
             {[
-              { icon: Globe, label: '5+', desc: 'Platforms Supported' },
-              { icon: TrendingUp, label: 'Real-Time', desc: 'Live Data Updates' },
-              { icon: BarChart3, label: '100%', desc: 'Data Accuracy' },
-              { icon: Clock, label: 'Instant', desc: 'Search Results' }
+              { icon: Globe, label: '4', desc: 'Core Marketplaces' },
+              { icon: Zap, label: 'Real-Time', desc: 'Direct Data Scraping' },
+              { icon: Shield, label: 'Verified', desc: 'No-Bullshit Margin Math' },
+              { icon: Clock, label: 'Instant', desc: 'Analysis & Simulator' }
             ].map((stat, i) => (
               <motion.div
                 key={i}
@@ -118,23 +137,23 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="text-center"
+                className="text-center group"
               >
-                <div className="w-12 h-12 bg-lime-100 dark:bg-lime-900/20 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <stat.icon className="w-6 h-6 text-lime-600 dark:text-lime-400" />
+                <div className="w-14 h-14 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:border-lime-500/30 transition-all shadow-sm">
+                  <stat.icon className="w-7 h-7 text-lime-600 dark:text-lime-400" />
                 </div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{stat.label}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">{stat.desc}</div>
+                <div className="text-4xl font-black text-gray-900 dark:text-white mb-1 leading-none">{stat.label}</div>
+                <div className="text-xs font-bold text-gray-500 dark:text-gray-500 uppercase tracking-widest">{stat.desc}</div>
               </motion.div>
             ))}
           </div>
 
           {/* Features Grid */}
-          <div id="features" className="grid md:grid-cols-3 gap-8 text-left mb-32">
+          <div id="features" className="grid md:grid-cols-3 gap-8 text-left mb-40 max-w-screen-2xl mx-auto">
             {[
-              { title: 'Real-Time Data', desc: 'Live scraping from 5+ major platforms instantly.', icon: Zap, color: 'text-amber-500 bg-amber-50 dark:bg-amber-900/10' },
-              { title: 'Trend Analysis', desc: 'Identify breakouts & profit margins before competitors.', icon: Globe, color: 'text-blue-500 bg-blue-50 dark:bg-blue-900/10' },
-              { title: 'Secure & Private', desc: 'Your product research history is 100% private to you.', icon: Shield, color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/10' }
+              { title: 'Loss Prevention', desc: 'Our simulator calculates the "Risk of Ruin" so you never test a product that is mathematically guaranteed to fail.', icon: Shield, color: 'text-amber-500 bg-amber-50 dark:bg-amber-900/10' },
+              { title: 'Global Decision Hub', desc: 'Consolidate research from Amazon, eBay, AliExpress, and Daraz into one unified decision engine.', icon: Globe, color: 'text-blue-500 bg-blue-50 dark:bg-blue-900/10' },
+              { title: 'Instant Profit Math', desc: 'No more spreadsheets. Dynamic sliders for ad spend, shipping, and returns show your pure profit margin.', icon: Zap, color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/10' }
             ].map((feature, i) => (
               <motion.div
                 key={i}
@@ -227,54 +246,53 @@ export default function LandingPage() {
           </div>
 
           {/* Pricing Section */}
-          <div id="pricing" className="py-20 text-center mb-32">
-            <h2 className="text-4xl font-extrabold mb-4 text-gray-900 dark:text-white">Simple Pricing Plans</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-16 max-w-2xl mx-auto">Start for free, upgrade when you scale. No hidden fees.</p>
+          <div id="pricing" className="py-20 text-center mb-40 max-w-screen-xl mx-auto">
+            <h2 className="text-5xl font-black mb-4 text-gray-900 dark:text-white tracking-tight">Simple Pricing Plans</h2>
+            <p className="text-xl text-gray-500 dark:text-gray-400 mb-20 max-w-2xl mx-auto">Scale your winning product output with full decision data. No hidden fees.</p>
 
-            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto text-left">
+            <div className="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto text-left">
               {/* Basic Plan */}
-              <div className="p-8 rounded-3xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/20 relative">
-                <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Basic</h3>
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-4xl font-extrabold text-lime-600 dark:text-lime-500">$9</span>
-                  <span className="text-gray-500">/month</span>
+              <div className="p-10 rounded-[32px] border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/20 relative hover:shadow-xl transition-all">
+                <h3 className="text-2xl font-black mb-2 text-gray-900 dark:text-white uppercase tracking-wider text-lime-600">Early Bird</h3>
+                <div className="flex items-baseline gap-1 mb-8">
+                  <span className="text-5xl font-black text-gray-900 dark:text-white">$9</span>
+                  <span className="text-gray-500 font-bold">/mo</span>
                 </div>
-                <p className="text-gray-500 dark:text-gray-400 mb-8">Perfect for beginners just starting their research.</p>
+                <p className="text-gray-500 dark:text-gray-400 mb-10 font-medium">For innovators who want to grow with us. Lock in this price forever.</p>
 
-                <ul className="space-y-4 mb-8">
-                  <Feature text="100 searches per month" />
+                <ul className="space-y-5 mb-10">
+                  <Feature text="Unlimited searches (Beta Special)" />
                   <Feature text="Live real-time data" />
-                  <Feature text="Auto-link to suppliers" />
+                  <Feature text="Profit Simulator access" />
                   <Feature text="Export to CSV" />
-                  <Feature text="API Access" cross />
+                  <Feature text="Community Discord" />
                 </ul>
 
                 <Link href="/signup?plan=basic">
-                  <Button variant="outline" className="w-full h-12">Get Basic</Button>
+                  <Button variant="outline" className="w-full h-14 text-lg font-bold border-2">Get Started</Button>
                 </Link>
               </div>
 
               {/* Pro Plan */}
-              <div className="p-8 rounded-3xl border-2 border-lime-500 bg-white dark:bg-gray-900 shadow-2xl relative overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
-                <div className="absolute top-0 right-0 bg-lime-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">POPULAR</div>
-                <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Pro Plan</h3>
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-4xl font-extrabold text-lime-600 dark:text-lime-500">$29</span>
-                  <span className="text-gray-500">/month</span>
+              <div className="p-10 rounded-[32px] border-[3px] border-lime-500 bg-white dark:bg-gray-900 shadow-2xl relative overflow-hidden transform hover:-translate-y-2 transition-all duration-300">
+                <div className="absolute top-0 right-0 bg-lime-500 text-white text-[10px] font-black px-4 py-2 rounded-bl-2xl uppercase tracking-widest">Recommended</div>
+                <h3 className="text-2xl font-black mb-2 text-gray-900 dark:text-white uppercase tracking-wider">Professional</h3>
+                <div className="flex items-baseline gap-1 mb-8">
+                  <span className="text-5xl font-black text-lime-600 dark:text-lime-500">$29</span>
+                  <span className="text-gray-500 font-bold">/mo</span>
                 </div>
-                <p className="text-gray-500 dark:text-gray-400 mb-8">For serious dropshippers scaling their business.</p>
+                <p className="text-gray-500 dark:text-gray-400 mb-10 font-medium">For serious dropshippers scaling their multi-store empire.</p>
 
-                <ul className="space-y-4 mb-8">
+                <ul className="space-y-5 mb-10">
+                  <Feature text="Unlimited Decision History" check />
                   <Feature text="3,000 searches per month" check />
-                  <Feature text="Live real-time data" check />
-                  <Feature text="Auto-link to suppliers" check />
-                  <Feature text="Export to CSV" check />
+                  <Feature text="Advanced Loss Prevention Simulator" check />
+                  <Feature text="Priority Search Queue" check />
                   <Feature text="API access (50/day)" check />
-                  <Feature text="Priority Support" check />
                 </ul>
 
                 <Link href="/signup?plan=pro">
-                  <Button className="w-full h-12 text-lg shadow-lime-500/25">Get Pro Access</Button>
+                  <Button variant="premium" className="w-full h-16 text-xl font-black shadow-xl shadow-lime-500/30">Get Pro Access</Button>
                 </Link>
               </div>
             </div>
@@ -397,13 +415,13 @@ export default function LandingPage() {
   );
 }
 
-function Feature({ text, check = true, cross = false }) {
+function Feature({ text, check = true, cross = false, crossCheck = false }) {
   return (
-    <li className={`flex items-center gap-3 ${cross ? 'text-gray-400 opacity-60' : 'text-gray-700 dark:text-gray-300'}`}>
-      <div className={`w-5 h-5 rounded-full flex items-center justify-center ${cross ? 'bg-gray-200 dark:bg-gray-800' : 'bg-lime-100 dark:bg-lime-900/30 text-lime-600 dark:text-lime-400'}`}>
-        {cross ? <X className="w-3 h-3" /> : <Check className="w-3 h-3" />}
+    <li className={`flex items-center gap-3 ${(cross || crossCheck) ? 'text-gray-400 opacity-60' : 'text-gray-700 dark:text-gray-300'}`}>
+      <div className={`w-5 h-5 rounded-full flex items-center justify-center ${(cross || crossCheck) ? 'bg-gray-200 dark:bg-gray-800' : 'bg-lime-100 dark:bg-lime-900/30 text-lime-600 dark:text-lime-400'}`}>
+        {(cross || crossCheck) ? <X className="w-3 h-3" /> : <Check className="w-3 h-3" />}
       </div>
-      {text}
+      <span className="font-medium text-sm">{text}</span>
     </li>
   );
 }

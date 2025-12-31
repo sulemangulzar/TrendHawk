@@ -218,11 +218,8 @@ export default function PricingPage() {
                             ) : (
                                 <Button
                                     onClick={() => handleUpgrade(plan.name.toLowerCase())}
-                                    className={`w-full ${plan.popular
-                                        ? 'shadow-lg shadow-lime-500/25'
-                                        : ''
-                                        }`}
-                                    variant={plan.popular ? 'default' : 'outline'}
+                                    className="w-full"
+                                    variant={plan.popular ? 'premium' : 'outline'}
                                     disabled={loadingPlan === plan.name.toLowerCase()}
                                 >
                                     {loadingPlan === plan.name.toLowerCase() ? 'Loading...' : plan.cta}

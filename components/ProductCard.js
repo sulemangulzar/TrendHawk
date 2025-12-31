@@ -165,6 +165,24 @@ export default function ProductCard({ product, onCalculateProfit, userPlan = 'fr
 
                 {/* Action Buttons */}
                 <div className="space-y-2 mt-auto">
+                    {/* View Product Button - Most Important */}
+                    {product.product_url && (
+                        <a
+                            href={product.product_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block"
+                        >
+                            <Button
+                                variant="outline"
+                                className="w-full flex items-center justify-center gap-2 border-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-500 dark:hover:border-blue-500"
+                            >
+                                <ExternalLink className="w-4 h-4" />
+                                View on {product.source === 'ebay' ? 'eBay' : 'Amazon'}
+                            </Button>
+                        </a>
+                    )}
+
                     {canAccessSuppliers ? (
                         <Button
                             onClick={handleFindSupplier}
@@ -198,18 +216,6 @@ export default function ProductCard({ product, onCalculateProfit, userPlan = 'fr
                         Calculate Profit
                     </Button>
                 </div>
-
-                {/* View on Amazon */}
-                {product.product_url && (
-                    <a
-                        href={product.product_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block mt-3 text-center text-xs text-lime-600 dark:text-lime-400 hover:underline"
-                    >
-                        View on Amazon →
-                    </a>
-                )}
             </div>
         </div>
     );
