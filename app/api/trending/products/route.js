@@ -37,7 +37,7 @@ export async function GET(request) {
         }
 
         // Only get products from the last 48 hours (not expired)
-        query = query.gt('expires_at', new Date().toISOString());
+        // query = query.gt('expires_at', new Date().toISOString());
 
         const { data, error } = await query;
 

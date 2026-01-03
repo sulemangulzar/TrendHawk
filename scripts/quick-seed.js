@@ -159,6 +159,7 @@ async function quickSeed() {
                 .from('trending_products')
                 .insert({
                     name: product.title,
+                    normalized_name: product.title.toLowerCase().replace(/[^a-z0-9]/g, ''),
                     price: product.price,
                     product_url: product.product_url,
                     source: 'Amazon',
@@ -180,7 +181,7 @@ async function quickSeed() {
 
         } catch (error) {
             errorCount++;
-            console.error(`  ✗ Error:`, error.message);
+            console.error(`  ✗ Error saving product:`, JSON.stringify(error, null, 2));
         }
     }
 

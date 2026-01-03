@@ -36,29 +36,21 @@ export async function POST(request) {
         }
 
         if (action === 'trending') {
-            // Scrape trending products
             const result = await amazonScraper.scrapeTrendingProducts(
                 category || 'all',
-                limit || 20
+                limit || 10
             );
 
-            if (!result.success) {
-                return NextResponse.json({ error: result.error }, { status: 500 });
+            if (result.success) {
+                for (const product of result.products) {
+                    await saveProductSnapshot({
+                        ...product,
+                        platform: 'Amazon'
+                    });
+                }
             }
 
-            // Save all products
-            for (const product of result.products) {
-                await saveProductSnapshot({
-                    ...product,
-                    platform: 'Amazon'
-                });
-            }
-
-            return NextResponse.json({
-                success: true,
-                count: result.products.length,
-                products: result.products
-            });
+            return NextResponse.json(result);
         }
 
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
@@ -102,6 +94,7 @@ async function saveProductSnapshot(productData) {
 
     const record = {
         name: productData.title,
+        normalized_name: productData.title.toLowerCase().replace(/[^a-z0-9]/g, ''),
         price: productData.price,
         product_url: productData.product_url,
         source: productData.platform,
