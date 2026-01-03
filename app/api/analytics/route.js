@@ -40,7 +40,7 @@ export async function GET(request) {
         const { count: productsCount, error: prodError } = await supabase
             .from('products')
             .select('*', { count: 'exact', head: true })
-            .in('job_id', jobIds);
+            .eq('user_id', userId); // Changed from in('job_id', jobIds) to simple user_id for robustness
 
         if (prodError) throw prodError;
 

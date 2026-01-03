@@ -1,20 +1,10 @@
+// Updated Risk Check API to use REAL data from database
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { scrapeProducts } from '@/lib/scraper';
-import { calculateVerdict } from '@/lib/verdictEngine';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+import { supabase } from '@/lib/supabase';
 
 export async function POST(request) {
     try {
-        const { productName, productUrl, userId } = await request.json();
-
-        if (!userId) {
-            return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
-        }
+        const { productName, productUrl } = await request.json();
 
         const input = (productUrl || productName || '').trim();
         if (!input) {
@@ -24,130 +14,122 @@ export async function POST(request) {
             );
         }
 
-        console.log(`🔍 Analyzing: ${input}`);
+        console.log('[Risk Check] Analyzing:', input);
 
-        // 1. Determine search keyword for caching
-        const searchKeyword = productUrl ? extractProductNameFromUrl(productUrl) : input;
-        const cacheKey = searchKeyword.toLowerCase().trim();
+        // Search for product in database
+        const searchTerm = input.toLowerCase();
 
-        const { data: existingProduct } = await supabase
-            .from('products')
+        const { data: products, error } = await supabase
+            .from('trending_products')
             .select('*')
-            .eq('keyword', cacheKey)
-            .not('verdict', 'is', null)
-            .order('analyzed_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+            .or(`name.ilike.%${searchTerm}%,product_url.ilike.%${searchTerm}%`)
+            .limit(1);
 
-        // If analyzed within 1 hour, return cached result
-        if (existingProduct && existingProduct.analyzed_at) {
-            const analyzedDate = new Date(existingProduct.analyzed_at);
-            const hoursSinceAnalysis = (Date.now() - analyzedDate.getTime()) / (1000 * 60 * 60);
-
-            if (hoursSinceAnalysis < 1) {
-                console.log(`✅ Using cache for: ${cacheKey} (${hoursSinceAnalysis.toFixed(1)}h ago)`);
-                return NextResponse.json({
-                    product: existingProduct,
-                    cached: true
-                });
-            }
+        if (error) {
+            console.error('[Risk Check] Database error:', error);
+            // Fall back to heuristics if database fails
+            return getFallbackAnalysis(input);
         }
 
-        // 2. Scrape product data
-        console.log(`🌐 Scraping market data for: ${input}...`);
-        const scrapedResults = await scrapeProducts(input);
+        if (products && products.length > 0) {
+            // Use real data from database
+            const product = products[0];
 
-        if (!scrapedResults || scrapedResults.length === 0) {
-            return NextResponse.json(
-                { error: 'Market data unavailable for this item. Try a more specific name or direct URL.' },
-                { status: 404 }
-            );
+            return NextResponse.json({
+                success: true,
+                product: {
+                    title: product.name,
+                    demand_level: calculateDemandLevel(product),
+                    saturation_level: calculateSaturationLevel(product),
+                    common_failure_reason: getFailureReason(product),
+                    price: product.price,
+                    price_min: product.price_min || product.price,
+                    price_max: product.price_max || product.price,
+                    source: 'real_data'
+                }
+            });
+        } else {
+            // No matching product found - use heuristics
+            console.log('[Risk Check] No product found in DB, using heuristics');
+            return getFallbackAnalysis(input);
         }
-
-        const productData = scrapedResults[0];
-
-        // 3. Calculate verdict
-        console.log(`🧮 Calculating verdict for: ${productData.title}`);
-        const verdictData = calculateVerdict(productData);
-
-        // 4. Save to database
-        const { data: savedProduct, error: saveError } = await supabase
-            .from('products')
-            .insert({
-                user_id: userId,
-                keyword: cacheKey,
-                title: productData.title,
-                price: productData.price,
-                image_url: productData.image_url,
-                product_url: productData.product_url,
-                review_count: productData.review_count || 0,
-                rating: productData.rating || 0,
-                source: productData.source,
-
-                // Verdict data
-                verdict: verdictData.verdict,
-                risk_level: verdictData.riskLevel,
-                demand_level: verdictData.demandLevel,
-                saturation_score: verdictData.saturationScore,
-                emotional_trigger_score: verdictData.emotionalTriggerScore,
-                confidence_score: verdictData.confidenceScore,
-
-                // Profit data
-                profit_worst_case: verdictData.profitWorstCase,
-                profit_average_case: verdictData.profitAverageCase,
-                profit_best_case: verdictData.profitBestCase,
-                estimated_cost: verdictData.estimatedCost,
-                estimated_shipping: verdictData.estimatedShipping,
-
-                // Analysis data
-                common_complaints: verdictData.commonComplaints,
-                failure_reasons: verdictData.failureReasons,
-                best_audience: verdictData.bestAudience,
-                avoid_audience: verdictData.avoidAudience,
-                money_saved: verdictData.moneySaved,
-
-                analyzed_at: new Date().toISOString()
-            })
-            .select()
-            .single();
-
-        if (saveError) {
-            console.error('Database Save Error:', saveError);
-            throw saveError;
-        }
-
-        return NextResponse.json({
-            product: savedProduct,
-            cached: false
-        });
 
     } catch (error) {
-        console.error('Analyze API Error:', error.message);
+        console.error('Risk Check API Error:', error);
         return NextResponse.json(
-            { error: error.message || 'Analysis failed. Please try again later.' },
+            { success: false, error: 'Analysis failed. Please try again.' },
             { status: 500 }
         );
     }
 }
 
-function extractProductNameFromUrl(url) {
-    if (!url) return 'Product';
-    try {
-        const urlObj = new URL(url);
-        // Amazon
-        if (url.includes('amazon.com')) {
-            const match = url.match(/\/([^\/]+)\/dp\//);
-            if (match) return match[1].replace(/-/g, ' ');
-        }
-        // eBay
-        if (url.includes('ebay.com')) {
-            const match = url.match(/\/itm\/([^\/]+)/);
-            if (match) return match[1].replace(/-/g, ' ');
-        }
-        // Fallback
-        const parts = urlObj.pathname.split('/').filter(p => p.length > 3);
-        return parts.length > 0 ? parts[parts.length - 1].replace(/-/g, ' ') : 'Product';
-    } catch (e) {
-        return 'Product';
+// Calculate demand based on real data
+function calculateDemandLevel(product) {
+    const listingCount = product.active_listings_count || 0;
+
+    // High demand: Many sellers (indicates customer interest)
+    if (listingCount > 30) return 'High';
+    if (listingCount > 10) return 'Medium';
+    return 'Low';
+}
+
+// Calculate saturation based on seller count
+function calculateSaturationLevel(product) {
+    const sellerCount = product.active_listings_count || 0;
+
+    // High saturation: Too many sellers
+    if (sellerCount > 50) return 'High';
+    if (sellerCount > 15) return 'Medium';
+    return 'Low';
+}
+
+// Determine most likely failure reason
+function getFailureReason(product) {
+    const saturation = calculateSaturationLevel(product);
+    const demand = calculateDemandLevel(product);
+
+    if (saturation === 'High') {
+        return 'Too many competitors - price war likely';
     }
+
+    if (demand === 'Low') {
+        return 'Limited market demand';
+    }
+
+    return 'Monitor competition and pricing';
+}
+
+// Fallback to heuristics when no database data
+function getFallbackAnalysis(input) {
+    const keyword = input.toLowerCase();
+
+    let demand = 'Medium';
+    let saturation = 'Medium';
+    let failureReason = 'Monitor competition levels';
+
+    // Heuristics (same as before)
+    if (keyword.includes('wireless') || keyword.includes('smart') ||
+        keyword.includes('portable') || keyword.includes('charger')) {
+        demand = 'High';
+    }
+
+    if (keyword.includes('phone case') || keyword.includes('charger') ||
+        keyword.includes('cable')) {
+        saturation = 'High';
+        failureReason = 'Price competition - too many sellers';
+    }
+
+    return NextResponse.json({
+        success: true,
+        product: {
+            title: input,
+            demand_level: demand,
+            saturation_level: saturation,
+            common_failure_reason: failureReason,
+            price: 25,
+            price_min: 20,
+            price_max: 50,
+            source: 'heuristic'
+        }
+    });
 }

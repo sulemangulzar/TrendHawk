@@ -16,6 +16,13 @@ export const metadata = {
   keywords: ['dropshipping', 'product research', 'ecommerce', 'amazon trends', 'ebay analytics', 'winning products'],
   authors: [{ name: 'TrendHawk Team' }],
   viewport: 'width=device-width, initial-scale=1',
+  icons: {
+    icon: [
+      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon.svg', type: 'image/svg+xml' }
+    ],
+    apple: '/favicon.png',
+  },
   openGraph: {
     title: 'TrendHawk - Find Winning Products Before They Go Viral',
     description: 'Professional product research for e-commerce sellers.',

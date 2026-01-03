@@ -1,10 +1,11 @@
 "use client";
-import { useState, Suspense } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { Button, Input } from '@/components/ui';
-import { TrendingUp, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Logo from '@/components/Logo';
 
 function LoginForm() {
     const { login } = useAuth();
@@ -35,14 +36,7 @@ function LoginForm() {
             <div className="w-full max-w-md">
                 {/* Logo */}
                 <div className="flex justify-center mb-8">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-lime-500 rounded-xl flex items-center justify-center shadow-lg shadow-lime-500/20">
-                            <TrendingUp className="w-7 h-7 text-white" />
-                        </div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                            TrendHawk
-                        </h1>
-                    </div>
+                    <Logo className="w-12 h-12" />
                 </div>
 
                 {/* Form Card */}
@@ -55,8 +49,8 @@ function LoginForm() {
                     </p>
 
                     {registered && (
-                        <div className="mb-6 p-3 bg-lime-50 dark:bg-lime-900/20 border border-lime-200 dark:border-lime-800 rounded-xl">
-                            <p className="text-sm text-lime-800 dark:text-lime-400">
+                        <div className="mb-6 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl">
+                            <p className="text-sm text-indigo-800 dark:text-indigo-400">
                                 ✓ Account created! Please sign in.
                             </p>
                         </div>
@@ -90,14 +84,14 @@ function LoginForm() {
                         />
 
                         <div className="flex justify-end">
-                            <Link href="#" className="text-sm text-lime-600 dark:text-lime-400 hover:underline font-medium">
+                            <Link href="#" className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
                                 Forgot Password?
                             </Link>
                         </div>
 
                         <Button
                             type="submit"
-                            className="w-full shadow-lg shadow-lime-500/20"
+                            className="w-full shadow-lg shadow-indigo-500/20"
                             disabled={loading}
                         >
                             {loading ? 'Signing In...' : 'Sign In'}
@@ -106,7 +100,7 @@ function LoginForm() {
 
                     <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
                         Don't have an account?{' '}
-                        <Link href="/signup" className="text-lime-600 dark:text-lime-400 font-semibold hover:underline">
+                        <Link href="/signup" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
                             Create Account
                         </Link>
                     </p>

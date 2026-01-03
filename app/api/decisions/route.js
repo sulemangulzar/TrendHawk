@@ -10,15 +10,52 @@ const supabase = createClient(
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { userId, productId, decision, notes } = body;
+        const { userId, productId: initialProductId, decision, notes, productName, productUrl, platform, price } = body;
 
-        console.log('[POST DIAGNOSTIC] Saving Decision:', { userId, productId, decision });
+        console.log('[POST DIAGNOSTIC] Saving Decision:', { userId, initialProductId, decision, productName, productUrl });
 
-        if (!userId || !productId || !decision) {
-            return NextResponse.json({ error: 'Missing required fields: userId, productId, or decision' }, { status: 400 });
+        if (!userId || (!initialProductId && !productUrl) || !decision) {
+            return NextResponse.json({ error: 'Missing required fields: userId, productId/url, or decision' }, { status: 400 });
         }
 
-        // Check if decision already exists to avoid unique constraint 500s
+        let productId = initialProductId;
+
+        // If no productId but we have a productUrl, find or create the product in the main products table
+        if (!productId && productUrl) {
+            // Check if product already exists by URL and User
+            const { data: existingProduct } = await supabase
+                .from('products')
+                .select('id')
+                .eq('user_id', userId)
+                .eq('product_url', productUrl)
+                .maybeSingle();
+
+            if (existingProduct) {
+                productId = existingProduct.id;
+            } else {
+                // Create the product
+                const { data: newProduct, error: productError } = await supabase
+                    .from('products')
+                    .insert({
+                        user_id: userId,
+                        title: productName || 'Trending Product',
+                        keyword: (productName || 'trending').toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                        product_url: productUrl,
+                        price: price?.toString() || '0',
+                        source: platform || 'Trending Engine'
+                    })
+                    .select('id')
+                    .single();
+
+                if (productError) {
+                    console.error('❌ Failed to create product for decision:', productError);
+                    return NextResponse.json({ error: `Product creation failed: ${productError.message}` }, { status: 500 });
+                }
+                productId = newProduct.id;
+            }
+        }
+
+        // Check if decision already exists
         const { data: existing } = await supabase
             .from('user_decisions')
             .select('id')
@@ -30,7 +67,7 @@ export async function POST(request) {
             return NextResponse.json({
                 error: 'This product is already in your candidates list.',
                 id: existing.id
-            }, { status: 200 }); // Return 200 as it's already "done"
+            }, { status: 200 });
         }
 
         const { data, error } = await supabase
@@ -47,7 +84,7 @@ export async function POST(request) {
         if (error) {
             console.error('❌ Supabase INSERT Error:', error);
             return NextResponse.json({
-                error: `Database Insert Failure: ${error.message} (Code: ${error.code})`,
+                error: `Database Insert Failure: ${error.message}`,
                 details: error
             }, { status: 500 });
         }
@@ -66,8 +103,9 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url);
         const userId = searchParams.get('userId');
         const decisionType = searchParams.get('decision');
+        const productUrl = searchParams.get('productUrl');
 
-        console.log('[GET DIAGNOSTIC] Fetching Decisions:', { userId, decisionType });
+        console.log('[GET DIAGNOSTIC] Fetching Decisions:', { userId, decisionType, productUrl });
 
         if (!userId) {
             return NextResponse.json({ error: 'Missing userId parameter' }, { status: 400 });
@@ -83,13 +121,17 @@ export async function GET(request) {
                 decision_status,
                 notes,
                 created_at,
-                product:products(*)
+                product:products!inner(*)
             `)
             .eq('user_id', userId)
             .order('created_at', { ascending: false });
 
         if (decisionType) {
             query = query.eq('decision', decisionType);
+        }
+
+        if (productUrl) {
+            query = query.eq('product.product_url', productUrl);
         }
 
         const { data, error } = await query;

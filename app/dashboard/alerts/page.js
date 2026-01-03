@@ -1,63 +1,144 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Bell, Plus, TrendingUp, DollarSign, Package, X, Check } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Bell, Plus, Zap, DollarSign, Package, X, Check, Loader2 } from 'lucide-react';
+import { Button, Input } from '@/components/ui';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import clsx from 'clsx';
 
 export default function AlertsPage() {
-    const [alerts, setAlerts] = useState([
-        {
-            id: 1,
-            type: 'price_drop',
-            product: 'Wireless Headphones',
-            condition: 'Price drops below $50',
-            status: 'active',
-            triggered: false
-        },
-        {
-            id: 2,
-            type: 'demand_spike',
-            product: 'Smart Watch',
-            condition: 'Demand score above 80',
-            status: 'active',
-            triggered: true
-        },
-        {
-            id: 3,
-            type: 'new_trending',
-            product: 'Gaming Mouse',
-            condition: 'Appears in trending',
-            status: 'paused',
-            triggered: false
-        }
-    ]);
-
+    const { user } = useAuth();
+    const { showToast } = useToast();
+    const [alerts, setAlerts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [creating, setCreating] = useState(false);
+
+    const [formData, setFormData] = useState({
+        keyword: '',
+        platform: 'any',
+        maxPrice: '',
+        minReviews: '',
+        minRating: '',
+        notificationEmail: true,
+        notificationApp: true
+    });
 
     const alertTypes = [
         { id: 'price_drop', label: 'Price Drop', icon: DollarSign, color: 'text-green-600 dark:text-green-400' },
-        { id: 'demand_spike', label: 'Demand Spike', icon: TrendingUp, color: 'text-blue-600 dark:text-blue-400' },
+        { id: 'demand_spike', label: 'Demand Spike', icon: Zap, color: 'text-blue-600 dark:text-blue-400' },
         { id: 'new_trending', label: 'New Trending', icon: Package, color: 'text-purple-600 dark:text-purple-400' }
     ];
 
-    const toggleAlert = (id) => {
-        setAlerts(alerts.map(alert =>
-            alert.id === id
-                ? { ...alert, status: alert.status === 'active' ? 'paused' : 'active' }
-                : alert
-        ));
+    useEffect(() => {
+        if (user) {
+            fetchAlerts();
+        }
+    }, [user]);
+
+    const fetchAlerts = async () => {
+        try {
+            const res = await fetch(`/api/alerts?userId=${user.id}`);
+            const data = await res.json();
+            if (res.ok) {
+                setAlerts(data.alerts || []);
+            }
+        } catch (error) {
+            console.error('Error fetching alerts:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const deleteAlert = (id) => {
-        setAlerts(alerts.filter(alert => alert.id !== id));
+    const toggleAlert = async (alertId, currentStatus) => {
+        try {
+            const res = await fetch('/api/alerts', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    alertId,
+                    userId: user.id,
+                    isActive: !currentStatus
+                })
+            });
+
+            if (res.ok) {
+                setAlerts(alerts.map(alert =>
+                    alert.id === alertId
+                        ? { ...alert, is_active: !currentStatus }
+                        : alert
+                ));
+                showToast(currentStatus ? 'Alert paused' : 'Alert activated', 'success');
+            }
+        } catch (error) {
+            showToast('Failed to update alert', 'error');
+        }
     };
 
-    const createAlert = () => {
-        // For now, just show a message
-        alert('Alert creation feature coming soon! This will allow you to set custom alerts for price drops, demand spikes, and new trending products.');
-        setShowCreateModal(false);
+    const deleteAlert = async (alertId) => {
+        if (!confirm('Are you sure you want to delete this alert?')) return;
+
+        try {
+            const res = await fetch(`/api/alerts?alertId=${alertId}&userId=${user.id}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                setAlerts(alerts.filter(alert => alert.id !== alertId));
+                showToast('Alert deleted successfully', 'success');
+            }
+        } catch (error) {
+            showToast('Failed to delete alert', 'error');
+        }
     };
+
+    const createAlert = async (e) => {
+        e.preventDefault();
+        setCreating(true);
+
+        try {
+            const res = await fetch('/api/alerts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user.id,
+                    ...formData
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setAlerts([data.alert, ...alerts]);
+                showToast('Alert created successfully!', 'success');
+                setShowCreateModal(false);
+                setFormData({
+                    keyword: '',
+                    platform: 'any',
+                    maxPrice: '',
+                    minReviews: '',
+                    minRating: '',
+                    notificationEmail: true,
+                    notificationApp: true
+                });
+            } else {
+                showToast(data.error || 'Failed to create alert', 'error');
+            }
+        } catch (error) {
+            showToast('Failed to create alert', 'error');
+        } finally {
+            setCreating(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 font-poppins max-w-7xl mx-auto">
@@ -72,7 +153,7 @@ export default function AlertsPage() {
                     </p>
                 </div>
 
-                <Button className="w-full sm:w-auto" onClick={createAlert}>
+                <Button className="w-full sm:w-auto" onClick={() => setShowCreateModal(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Create Alert
                 </Button>
@@ -92,7 +173,7 @@ export default function AlertsPage() {
                             <div>
                                 <p className="font-semibold text-gray-900 dark:text-white text-sm">{type.label}</p>
                                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                                    {alerts.filter(a => a.type === type.id && a.status === 'active').length} active
+                                    {alerts.filter(a => a.is_active).length} active
                                 </p>
                             </div>
                         </div>
@@ -111,88 +192,82 @@ export default function AlertsPage() {
                         <p className="text-gray-600 dark:text-gray-400 mb-6">
                             Create your first alert to get notified about product changes
                         </p>
-                        <Button onClick={createAlert}>
-                            <Plus className="w-4 h-4 mr-2" />
-                            Create Your First Alert
-                        </Button>
+                        <div className="flex justify-center">
+                            <Button onClick={() => setShowCreateModal(true)}>
+                                <Plus className="w-4 h-4 mr-2" />
+                                Create Your First Alert
+                            </Button>
+                        </div>
                     </div>
                 ) : (
-                    alerts.map((alert) => {
-                        const alertType = alertTypes.find(t => t.type === alert.type) || alertTypes[0];
-                        return (
-                            <div
-                                key={alert.id}
-                                className={clsx(
-                                    "bg-white dark:bg-forest-900/40 border rounded-xl p-6 transition-all",
-                                    alert.status === 'active'
-                                        ? "border-gray-200 dark:border-forest-800"
-                                        : "border-gray-200 dark:border-forest-800 opacity-60"
-                                )}
-                            >
-                                <div className="flex items-start justify-between gap-4">
-                                    <div className="flex items-start gap-4 flex-1">
-                                        <div className={clsx(
-                                            "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0",
-                                            alert.status === 'active' ? "bg-lime-100 dark:bg-lime-900/30" : "bg-gray-100 dark:bg-forest-800"
-                                        )}>
-                                            <alertType.icon className={clsx(
-                                                "w-6 h-6",
-                                                alert.status === 'active' ? alertType.color : "text-gray-400"
-                                            )} />
-                                        </div>
-
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <h3 className="font-bold text-gray-900 dark:text-white">{alert.product}</h3>
-                                                {alert.triggered && (
-                                                    <span className="px-2 py-0.5 bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400 text-xs font-semibold rounded-full">
-                                                        Triggered
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                                                {alert.condition}
-                                            </p>
-                                            <div className="flex items-center gap-2">
-                                                <span className={clsx(
-                                                    "px-2 py-1 text-xs font-medium rounded-lg",
-                                                    alert.status === 'active'
-                                                        ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                                                        : "bg-gray-100 dark:bg-forest-800 text-gray-600 dark:text-gray-400"
-                                                )}>
-                                                    {alert.status === 'active' ? 'Active' : 'Paused'}
-                                                </span>
-                                                <span className="text-xs text-gray-500 dark:text-gray-500">
-                                                    {alertType.label}
-                                                </span>
-                                            </div>
-                                        </div>
+                    alerts.map((alert) => (
+                        <div
+                            key={alert.id}
+                            className={clsx(
+                                "bg-white dark:bg-forest-900/40 border rounded-xl p-6 transition-all",
+                                alert.is_active
+                                    ? "border-gray-200 dark:border-forest-800"
+                                    : "border-gray-200 dark:border-forest-800 opacity-60"
+                            )}
+                        >
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex items-start gap-4 flex-1">
+                                    <div className={clsx(
+                                        "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0",
+                                        alert.is_active ? "bg-indigo-100 dark:bg-indigo-900/30" : "bg-gray-100 dark:bg-forest-800"
+                                    )}>
+                                        <Bell className={clsx(
+                                            "w-6 h-6",
+                                            alert.is_active ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400"
+                                        )} />
                                     </div>
 
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => toggleAlert(alert.id)}
-                                            className="p-2 hover:bg-gray-100 dark:hover:bg-forest-800 rounded-lg transition-colors"
-                                            title={alert.status === 'active' ? 'Pause' : 'Activate'}
-                                        >
-                                            {alert.status === 'active' ? (
-                                                <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
-                                            ) : (
-                                                <Bell className="w-5 h-5 text-gray-400" />
-                                            )}
-                                        </button>
-                                        <button
-                                            onClick={() => deleteAlert(alert.id)}
-                                            className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                            title="Delete"
-                                        >
-                                            <X className="w-5 h-5 text-red-600 dark:text-red-400" />
-                                        </button>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <h3 className="font-bold text-gray-900 dark:text-white capitalize">{alert.keyword}</h3>
+                                        </div>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                            Platform: {alert.platform === 'any' ? 'All' : alert.platform}
+                                            {alert.max_price && ` • Max Price: $${alert.max_price}`}
+                                            {alert.min_reviews && ` • Min Reviews: ${alert.min_reviews}`}
+                                            {alert.min_rating && ` • Min Rating: ${alert.min_rating}★`}
+                                        </p>
+                                        <div className="flex items-center gap-2">
+                                            <span className={clsx(
+                                                "px-2 py-1 text-xs font-medium rounded-lg",
+                                                alert.is_active
+                                                    ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                                    : "bg-gray-100 dark:bg-forest-800 text-gray-600 dark:text-gray-400"
+                                            )}>
+                                                {alert.is_active ? 'Active' : 'Paused'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
+
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => toggleAlert(alert.id, alert.is_active)}
+                                        className="p-2 hover:bg-gray-100 dark:hover:bg-forest-800 rounded-lg transition-colors"
+                                        title={alert.is_active ? 'Pause' : 'Activate'}
+                                    >
+                                        {alert.is_active ? (
+                                            <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                        ) : (
+                                            <Bell className="w-5 h-5 text-gray-400" />
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={() => deleteAlert(alert.id)}
+                                        className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                        title="Delete"
+                                    >
+                                        <X className="w-5 h-5 text-red-600 dark:text-red-400" />
+                                    </button>
+                                </div>
                             </div>
-                        );
-                    })
+                        </div>
+                    ))
                 )}
             </div>
 
@@ -211,6 +286,96 @@ export default function AlertsPage() {
                     </Button>
                 </Link>
             </div>
+
+            {/* Create Alert Modal */}
+            {showCreateModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-white dark:bg-forest-900 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Create Alert</h2>
+                            <button
+                                onClick={() => setShowCreateModal(false)}
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-forest-800 rounded-lg"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={createAlert} className="space-y-4">
+                            <Input
+                                label="Keyword"
+                                placeholder="e.g., wireless headphones"
+                                value={formData.keyword}
+                                onChange={(e) => setFormData({ ...formData, keyword: e.target.value })}
+                                required
+                            />
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Platform
+                                </label>
+                                <select
+                                    value={formData.platform}
+                                    onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-forest-700 bg-white dark:bg-forest-800 text-gray-900 dark:text-white"
+                                >
+                                    <option value="any">All Platforms</option>
+                                    <option value="amazon">Amazon</option>
+                                    <option value="ebay">eBay</option>
+                                </select>
+                            </div>
+
+                            <Input
+                                label="Max Price (Optional)"
+                                type="number"
+                                placeholder="e.g., 50"
+                                value={formData.maxPrice}
+                                onChange={(e) => setFormData({ ...formData, maxPrice: e.target.value })}
+                            />
+
+                            <Input
+                                label="Min Reviews (Optional)"
+                                type="number"
+                                placeholder="e.g., 100"
+                                value={formData.minReviews}
+                                onChange={(e) => setFormData({ ...formData, minReviews: e.target.value })}
+                            />
+
+                            <Input
+                                label="Min Rating (Optional)"
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                max="5"
+                                placeholder="e.g., 4.5"
+                                value={formData.minRating}
+                                onChange={(e) => setFormData({ ...formData, minRating: e.target.value })}
+                            />
+
+                            <div className="flex gap-4 pt-4">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setShowCreateModal(false)}
+                                    className="flex-1"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button type="submit" disabled={creating} className="flex-1">
+                                    {creating ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Creating...
+                                        </>
+                                    ) : (
+                                        'Create Alert'
+                                    )}
+                                </Button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

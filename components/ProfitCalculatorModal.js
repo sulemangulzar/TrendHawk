@@ -1,16 +1,17 @@
 "use client";
 import { useState } from 'react';
-import { X, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
+import { X, DollarSign, TrendingUp, AlertCircle, Activity } from 'lucide-react';
 import { Button } from './ui';
 
 export default function ProfitCalculatorModal({ isOpen, onClose, product }) {
-    const [sellingPrice, setSellingPrice] = useState(product?.price ? (product.price * 3).toFixed(2) : '');
-
     if (!isOpen || !product) return null;
+
+    const title = product.title || product.name || 'Unknown Product';
+    const cost = parseFloat(product.price) || 0;
+    const [sellingPrice, setSellingPrice] = useState(cost > 0 ? (cost * 3).toFixed(2) : '');
 
     // Calculate profit breakdown
     const selling = parseFloat(sellingPrice) || 0;
-    const cost = product.price || 0;
     const costPercentage = cost > 0 ? ((cost / selling) * 100).toFixed(0) : 25;
     const adSpend = 10; // Fixed $10 ad spend
     const profit = selling - cost - adSpend;
@@ -22,7 +23,7 @@ export default function ProfitCalculatorModal({ isOpen, onClose, product }) {
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-forest-800">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        <DollarSign className="w-6 h-6 text-lime-600" />
+                        <DollarSign className="w-6 h-6 text-indigo-600" />
                         Profit Calculator
                     </h2>
                     <button
@@ -39,9 +40,9 @@ export default function ProfitCalculatorModal({ isOpen, onClose, product }) {
                     <div className="bg-gray-50 dark:bg-forest-950 p-4 rounded-xl">
                         <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Product</p>
                         <p className="font-semibold text-gray-900 dark:text-white line-clamp-2">
-                            {product.title}
+                            {title}
                         </p>
-                        <p className="text-lg font-bold text-lime-600 dark:text-lime-400 mt-2">
+                        <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400 mt-2">
                             Cost: ${cost.toFixed(2)}
                         </p>
                     </div>
@@ -59,7 +60,7 @@ export default function ProfitCalculatorModal({ isOpen, onClose, product }) {
                                 type="number"
                                 value={sellingPrice}
                                 onChange={(e) => setSellingPrice(e.target.value)}
-                                className="w-full pl-8 pr-4 py-3 bg-white dark:bg-forest-950 border border-gray-300 dark:border-forest-700 rounded-xl text-lg font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-lime-500 focus:border-transparent"
+                                className="w-full pl-8 pr-4 py-3 bg-white dark:bg-forest-950 border border-gray-300 dark:border-forest-700 rounded-xl text-lg font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                 placeholder="0.00"
                                 step="0.01"
                                 min="0"
@@ -93,8 +94,8 @@ export default function ProfitCalculatorModal({ isOpen, onClose, product }) {
 
                         {/* Profit */}
                         <div className={`flex justify-between items-center p-4 rounded-lg border-2 ${profit > 0
-                                ? 'bg-green-50 dark:bg-green-900/20 border-green-500 dark:border-green-700'
-                                : 'bg-gray-50 dark:bg-gray-900/20 border-gray-300 dark:border-gray-700'
+                            ? 'bg-green-50 dark:bg-green-900/20 border-green-500 dark:border-green-700'
+                            : 'bg-gray-50 dark:bg-gray-900/20 border-gray-300 dark:border-gray-700'
                             }`}>
                             <div>
                                 <span className="text-sm text-gray-700 dark:text-gray-300 block">
@@ -105,8 +106,8 @@ export default function ProfitCalculatorModal({ isOpen, onClose, product }) {
                                 </span>
                             </div>
                             <span className={`text-2xl font-black ${profit > 0
-                                    ? 'text-green-700 dark:text-green-400'
-                                    : 'text-gray-700 dark:text-gray-400'
+                                ? 'text-green-700 dark:text-green-400'
+                                : 'text-gray-700 dark:text-gray-400'
                                 }`}>
                                 ${profit.toFixed(2)}
                             </span>
@@ -115,13 +116,13 @@ export default function ProfitCalculatorModal({ isOpen, onClose, product }) {
 
                     {/* Recommendation */}
                     {profit > 0 && profitMargin >= 30 && (
-                        <div className="flex items-start gap-2 p-3 bg-lime-50 dark:bg-lime-900/20 rounded-lg border border-lime-200 dark:border-lime-800">
-                            <TrendingUp className="w-5 h-5 text-lime-600 dark:text-lime-400 flex-shrink-0 mt-0.5" />
+                        <div className="flex items-start gap-2 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                            <Activity className="w-5 h-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-0.5" />
                             <div>
-                                <p className="text-sm font-semibold text-lime-900 dark:text-lime-300">
+                                <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-300">
                                     Great Margin!
                                 </p>
-                                <p className="text-xs text-lime-700 dark:text-lime-400">
+                                <p className="text-xs text-indigo-700 dark:text-indigo-400">
                                     This product has a healthy profit margin. Consider testing it!
                                 </p>
                             </div>

@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import Logo from '@/components/Logo';
 import {
-    TrendingUp,
     Search,
     Heart,
     Package,
@@ -38,7 +38,7 @@ export default function AnalyticsPage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-black p-6 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-lime-600 animate-spin" />
+                <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
             </div>
         );
     }
@@ -80,8 +80,8 @@ export default function AnalyticsPage() {
                     {/* Products Found */}
                     <div className="bg-white dark:bg-forest-900/40 border border-gray-200 dark:border-forest-800 rounded-2xl p-6 hover:shadow-xl transition-shadow">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-lime-100 dark:bg-lime-900/30 rounded-xl flex items-center justify-center">
-                                <Package className="w-6 h-6 text-lime-600 dark:text-lime-400" />
+                            <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center">
+                                <Package className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                             </div>
                             <div>
                                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -111,7 +111,7 @@ export default function AnalyticsPage() {
                     <div className="bg-white dark:bg-forest-900/40 border border-gray-200 dark:border-forest-800 rounded-2xl p-6 hover:shadow-xl transition-shadow">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-                                <TrendingUp className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                                <Logo iconOnly={true} className="w-6 h-6" />
                             </div>
                             <div>
                                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -155,10 +155,10 @@ export default function AnalyticsPage() {
                                         </div>
                                         <span
                                             className={`text-xs px-2 py-1 rounded-full ${search.status === 'completed'
-                                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                                                    : search.status === 'failed'
-                                                        ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-                                                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                                                : search.status === 'failed'
+                                                    ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                                                    : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
                                                 }`}
                                         >
                                             {search.status}
@@ -186,8 +186,8 @@ export default function AnalyticsPage() {
                                         className="flex items-center justify-between p-3 bg-gray-50 dark:bg-forest-950 rounded-lg"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 bg-lime-100 dark:bg-lime-900/30 rounded-lg flex items-center justify-center">
-                                                <span className="text-sm font-bold text-lime-600 dark:text-lime-400">
+                                            <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                                                <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
                                                     #{index + 1}
                                                 </span>
                                             </div>

@@ -162,10 +162,10 @@ export default function InsightsPage() {
             </section>
 
             {/* Pro Tip */}
-            <div className="bg-lime-500 text-white rounded-2xl p-6 text-center">
+            <div className="bg-indigo-500 text-white rounded-2xl p-6 text-center">
                 <Lightbulb className="w-12 h-12 mx-auto mb-3" />
                 <h3 className="text-xl font-bold mb-2">Pro Tip</h3>
-                <p className="text-lime-50">
+                <p className="text-indigo-50">
                     The best products combine low saturation, clear emotional triggers, and healthy profit margins.
                     Use TrendHawk's verdict system to find these opportunities automatically.
                 </p>
@@ -201,7 +201,7 @@ function InsightCard({ icon, title, points }) {
             <ul className="space-y-2">
                 {points.map((point, i) => (
                     <li key={i} className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-2">
-                        <span className="text-lime-500 mt-1">•</span>
+                        <span className="text-indigo-500 mt-1">•</span>
                         {point}
                     </li>
                 ))}

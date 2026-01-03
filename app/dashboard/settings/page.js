@@ -94,7 +94,7 @@ export default function SettingsPage() {
                     {/* Profile Section */}
                     <div className="bg-white dark:bg-forest-900/40 border-2 border-gray-100 dark:border-forest-800 rounded-3xl p-6 md:p-8 shadow-sm">
                         <div className="flex items-center gap-4 mb-8">
-                            <div className="w-12 h-12 bg-lime-100 dark:bg-lime-900/20 rounded-2xl flex items-center justify-center text-lime-600 dark:text-lime-400">
+                            <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                                 <User className="w-6 h-6" />
                             </div>
                             <div>
@@ -180,7 +180,7 @@ export default function SettingsPage() {
                             <span className="font-medium text-gray-700 dark:text-gray-300">Dark Mode</span>
                             <button
                                 onClick={toggleTheme}
-                                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all ${theme === 'dark' ? 'bg-lime-500' : 'bg-gray-300'}`}
+                                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all ${theme === 'dark' ? 'bg-indigo-500' : 'bg-gray-300'}`}
                             >
                                 <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${theme === 'dark' ? 'translate-x-6' : 'translate-x-1'}`} />
                             </button>
@@ -188,22 +188,22 @@ export default function SettingsPage() {
                     </div>
 
                     {/* Subscription Status */}
-                    <div className="bg-gradient-to-br from-lime-500 to-emerald-600 rounded-3xl p-6 text-white shadow-lg shadow-lime-500/20">
+                    <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-3xl p-6 text-white shadow-lg shadow-indigo-500/20">
                         <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                            <Shield className="w-5 h-5 text-lime-200" />
+                            <Shield className="w-5 h-5 text-indigo-200" />
                             Current Plan
                         </h3>
                         <div className="mb-6">
                             <p className="text-3xl font-black mb-1">
                                 {user?.user_metadata?.subscription_plan?.toUpperCase() || 'FREE'}
                             </p>
-                            <p className="text-lime-100 text-sm opacity-80">
+                            <p className="text-indigo-100 text-sm opacity-80">
                                 {user?.user_metadata?.subscription_plan === 'pro' ? 'Enjoying all pro features' : 'Basic exploration limits'}
                             </p>
                         </div>
                         {user?.user_metadata?.subscription_plan !== 'pro' && (
                             <a href="/pricing">
-                                <Button variant="premium" className="w-full bg-white text-lime-600 hover:bg-lime-50 border-none h-12">
+                                <Button variant="premium" className="w-full bg-white text-indigo-600 hover:bg-indigo-50 border-none h-12">
                                     Upgrade to Pro
                                 </Button>
                             </a>

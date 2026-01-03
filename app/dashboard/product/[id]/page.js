@@ -4,11 +4,13 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { AnalysisResults } from '@/components/AnalysisResults';
 import { Button } from '@/components/ui';
-import { Loader2, ArrowLeft, ExternalLink } from 'lucide-react';
+import { Loader2, ArrowLeft, ExternalLink, Trash2 } from 'lucide-react';
+import { useToast } from '@/context/ToastContext';
 
 export default function ProductDetailPage() {
     const { id } = useParams();
     const { user, loading: authLoading } = useAuth();
+    const { showToast } = useToast();
     const router = useRouter();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -24,6 +26,27 @@ export default function ProductDetailPage() {
             fetchProduct();
         }
     }, [user, id, authLoading]);
+
+    const handleDelete = async () => {
+        if (!confirm('Permanently delete this product analysis?')) return;
+
+        try {
+            const res = await fetch(`/api/products/${id}?userId=${user.id}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                showToast('Product deleted permanently', 'success');
+                router.push('/dashboard/explore');
+            } else {
+                const data = await res.json();
+                showToast(data.error || 'Failed to delete', 'error');
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            showToast('Error deleting product', 'error');
+        }
+    };
 
     const fetchProduct = async () => {
         try {
@@ -43,7 +66,7 @@ export default function ProductDetailPage() {
     if (loading || authLoading) {
         return (
             <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-                <Loader2 className="w-12 h-12 text-lime-500 animate-spin" />
+                <Loader2 className="w-12 h-12 text-indigo-500 animate-spin" />
                 <p className="text-gray-500 dark:text-gray-400 font-medium">Crunching market data...</p>
             </div>
         );
@@ -77,33 +100,33 @@ export default function ProductDetailPage() {
                     Back
                 </button>
 
-                {product.product_url && (
-                    <a
-                        href={product.product_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-lime-600 dark:text-lime-400 font-bold hover:underline"
+                <div className="flex items-center gap-4">
+                    {product.product_url && (
+                        <a
+                            href={product.product_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
+                        >
+                            View on {product.source === 'amazon' ? 'Amazon' : 'eBay'}
+                            <ExternalLink className="w-4 h-4" />
+                        </a>
+                    )}
+                    <button
+                        onClick={handleDelete}
+                        className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl font-bold transition-all border border-red-100 dark:border-red-900/40"
                     >
-                        View on {product.source === 'amazon' ? 'Amazon' : 'eBay'}
-                        <ExternalLink className="w-4 h-4" />
-                    </a>
-                )}
+                        <Trash2 className="w-4 h-4" />
+                        Delete
+                    </button>
+                </div>
             </div>
 
             {/* Product Header Info */}
-            <div className="flex flex-col md:flex-row gap-8 bg-white dark:bg-forest-900/40 p-8 rounded-3xl border border-gray-200 dark:border-forest-800">
-                {product.image_url && (
-                    <div className="w-full md:w-1/3 aspect-square rounded-2xl overflow-hidden bg-white">
-                        <img
-                            src={product.image_url}
-                            alt={product.title}
-                            className="w-full h-full object-contain p-4"
-                        />
-                    </div>
-                )}
+            <div className="bg-white dark:bg-forest-900/40 p-8 rounded-3xl border border-gray-200 dark:border-forest-800">
                 <div className="flex-1 space-y-4">
                     <div className="flex items-center gap-2">
-                        <span className="px-3 py-1 bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400 text-xs font-bold rounded-full uppercase">
+                        <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-xs font-bold rounded-full uppercase">
                             {product.source}
                         </span>
                         <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs font-bold rounded-full uppercase">
@@ -116,7 +139,7 @@ export default function ProductDetailPage() {
                     <div className="flex items-center gap-6">
                         <div>
                             <p className="text-xs text-gray-500 uppercase font-black mb-1">Price</p>
-                            <p className="text-2xl font-black text-lime-600 dark:text-lime-400">${product.price}</p>
+                            <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400">${product.price}</p>
                         </div>
                         {product.rating && (
                             <div>

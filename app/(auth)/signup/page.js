@@ -1,10 +1,11 @@
 "use client";
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { Button, Input } from '@/components/ui';
-import { TrendingUp, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Logo from '@/components/Logo';
 
 export default function SignupPage() {
     const { register } = useAuth();
@@ -33,14 +34,7 @@ export default function SignupPage() {
             <div className="w-full max-w-md">
                 {/* Logo */}
                 <div className="flex justify-center mb-8">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-lime-500 rounded-xl flex items-center justify-center shadow-lg shadow-lime-500/20">
-                            <TrendingUp className="w-7 h-7 text-white" />
-                        </div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                            TrendHawk
-                        </h1>
-                    </div>
+                    <Logo className="w-12 h-12" />
                 </div>
 
                 {/* Form Card */}
@@ -89,7 +83,7 @@ export default function SignupPage() {
 
                         <Button
                             type="submit"
-                            className="w-full shadow-lg shadow-lime-500/20"
+                            className="w-full shadow-lg shadow-indigo-500/20"
                             disabled={loading}
                         >
                             {loading ? 'Creating Account...' : 'Create Account'}
@@ -98,7 +92,7 @@ export default function SignupPage() {
 
                     <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
                         Already have an account?{' '}
-                        <Link href="/login" className="text-lime-600 dark:text-lime-400 font-semibold hover:underline">
+                        <Link href="/login" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
                             Sign In
                         </Link>
                     </p>

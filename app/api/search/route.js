@@ -124,7 +124,6 @@ async function runScrapeJob(jobId, keyword, platform = 'amazon') {
             keyword,
             title: p.title,
             price: p.price,
-            image_url: p.image_url,
             product_url: p.product_url,
             review_count: p.review_count,
             rating: p.rating,

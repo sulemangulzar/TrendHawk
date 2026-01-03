@@ -42,7 +42,7 @@ export default function ProductCard({ product, onCalculateProfit, userPlan = 'fr
             return {
                 label: 'Opportunity',
                 color: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-300 dark:border-green-800',
-                icon: TrendingUp,
+                icon: Zap,
             };
         } else {
             return {
@@ -99,41 +99,31 @@ export default function ProductCard({ product, onCalculateProfit, userPlan = 'fr
     };
 
     return (
-        <div className="bg-white dark:bg-forest-900/40 border border-gray-200 dark:border-forest-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col h-full">
-            {/* Image */}
-            <div className="relative h-48 bg-gray-100 dark:bg-forest-800 overflow-hidden">
-                {product.image_url ? (
-                    <img
-                        src={product.image_url}
-                        alt={product.title}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                    />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        No Image
+        <div className="bg-white dark:bg-forest-900/40 rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 group flex flex-col h-full ring-1 ring-gray-100 dark:ring-white/5">
+            {/* Header / Badges */}
+            <div className="relative pt-4 px-4 bg-gray-50/50 dark:bg-forest-800/20">
+                <div className="flex items-center justify-between gap-3 min-h-[40px]">
+                    {/* Favorite Button */}
+                    <button
+                        onClick={toggleFavorite}
+                        disabled={favoriteLoading || !user}
+                        className="p-2 bg-white/90 dark:bg-forest-950/90 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 transition-transform disabled:opacity-50 border border-gray-100 dark:border-forest-700"
+                        title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                        <Heart
+                            className={`w-5 h-5 transition-colors ${isFavorited
+                                ? 'fill-red-500 text-red-500'
+                                : 'text-gray-400 dark:text-forest-400'
+                                }`}
+                        />
+                    </button>
+
+                    {/* Saturation Badge */}
+                    <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border flex items-center gap-1 ${saturation.color}`}>
+                        <SaturationIcon className="w-3 h-3" />
+                        {saturation.label}
                     </div>
-                )}
-
-                {/* Saturation Badge */}
-                <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1 ${saturation.color}`}>
-                    <SaturationIcon className="w-3 h-3" />
-                    {saturation.label}
                 </div>
-
-                {/* Favorite Button */}
-                <button
-                    onClick={toggleFavorite}
-                    disabled={favoriteLoading || !user}
-                    className="absolute top-3 left-3 p-2 bg-white/90 dark:bg-forest-950/90 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 transition-transform disabled:opacity-50"
-                    title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
-                >
-                    <Heart
-                        className={`w-5 h-5 transition-colors ${isFavorited
-                            ? 'fill-red-500 text-red-500'
-                            : 'text-gray-400 dark:text-forest-400'
-                            }`}
-                    />
-                </button>
             </div>
 
             {/* Content */}
@@ -145,7 +135,7 @@ export default function ProductCard({ product, onCalculateProfit, userPlan = 'fr
 
                 {/* Price */}
                 <div className="mb-3">
-                    <span className="text-3xl font-black text-lime-600 dark:text-lime-400">
+                    <span className="text-3xl font-black text-indigo-600 dark:text-indigo-400">
                         ${product.price ? product.price.toFixed(2) : 'N/A'}
                     </span>
                 </div>
@@ -194,13 +184,13 @@ export default function ProductCard({ product, onCalculateProfit, userPlan = 'fr
                         </Button>
                     ) : (
                         <a href="/pricing" className="block">
-                            <div className="w-full p-3 rounded-xl border-2 border-dashed border-lime-500/50 bg-gradient-to-r from-lime-50 to-lime-100 dark:from-lime-900/10 dark:to-lime-800/10 hover:from-lime-100 hover:to-lime-200 dark:hover:from-lime-900/20 dark:hover:to-lime-800/20 transition-all cursor-pointer group">
-                                <div className="flex items-center justify-center gap-2 text-lime-700 dark:text-lime-400">
+                            <div className="w-full p-3 rounded-xl border-2 border-dashed border-indigo-500/50 bg-gradient-to-r from-indigo-50 to-indigo-100 dark:from-indigo-900/10 dark:to-indigo-800/10 hover:from-indigo-100 hover:to-indigo-200 dark:hover:from-indigo-900/20 dark:hover:to-indigo-800/20 transition-all cursor-pointer group">
+                                <div className="flex items-center justify-center gap-2 text-indigo-700 dark:text-indigo-400">
                                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z" />
                                     </svg>
                                     <span className="font-semibold text-sm">Unlock Suppliers</span>
-                                    <span className="text-xs bg-lime-500 text-white px-2 py-0.5 rounded-full font-bold group-hover:scale-110 transition-transform">
+                                    <span className="text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-full font-bold group-hover:scale-110 transition-transform">
                                         PRO
                                     </span>
                                 </div>

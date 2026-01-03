@@ -140,7 +140,7 @@ function ProfitRealitySection({ result }) {
                 </div>
                 <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Sell Price</p>
-                    <p className="text-2xl font-bold text-lime-600 dark:text-lime-400">${result.price}</p>
+                    <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">${result.price}</p>
                 </div>
             </div>
             <div className="border-t border-gray-200 dark:border-forest-700 pt-4 space-y-2">

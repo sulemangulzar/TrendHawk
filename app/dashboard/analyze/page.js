@@ -102,7 +102,7 @@ export default function AnalyzePage() {
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             placeholder="Enter Product Name or Paste ANY URL (Amazon, eBay, Shopify, etc.)"
-                            className="flex-1 px-4 py-4 bg-white dark:bg-forest-900 border border-gray-300 dark:border-forest-700 rounded-xl text-gray-900 dark:text-white text-lg focus:ring-2 focus:ring-lime-500"
+                            className="flex-1 px-4 py-4 bg-white dark:bg-forest-900 border border-gray-300 dark:border-forest-700 rounded-xl text-gray-900 dark:text-white text-lg focus:ring-2 focus:ring-indigo-500"
                             disabled={loading}
                         />
                     </div>
@@ -111,7 +111,7 @@ export default function AnalyzePage() {
                         <Button
                             type="submit"
                             disabled={loading || !input.trim()}
-                            className="w-full md:w-auto min-w-[300px] h-16 text-xl font-bold rounded-2xl shadow-xl shadow-lime-500/20"
+                            className="w-full md:w-auto min-w-[300px] h-16 text-xl font-bold rounded-2xl shadow-xl shadow-indigo-500/20"
                         >
                             {loading ? (
                                 <>
@@ -149,7 +149,7 @@ export default function AnalyzePage() {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-2xl mx-auto">
                         <Button
                             onClick={handleSaveCandidate}
-                            className="w-full sm:flex-1 h-16 md:h-14 text-lg font-black shadow-xl shadow-lime-500/10 rounded-2xl"
+                            className="w-full sm:flex-1 h-16 md:h-14 text-lg font-black shadow-xl shadow-indigo-500/10 rounded-2xl"
                         >
                             <span className="mr-2">⭐</span>
                             Save As Candidate

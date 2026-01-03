@@ -2,8 +2,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import Logo from '@/components/Logo';
 import {
-    TrendingUp, LogOut, Moon, Sun, Crown
+    LogOut, Moon, Sun, Crown
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -13,14 +14,11 @@ export default function Sidebar() {
     const { theme, toggleTheme } = useTheme();
 
     const navigation = [
-        { name: 'Dashboard', href: '/dashboard', icon: '📊' },
-        { name: 'Daily Action', href: '/dashboard/daily', icon: '🎯' },
-        { name: 'Profit Simulator', href: '/dashboard/simulator', icon: '🎮' },
-        { name: 'Explore', href: '/dashboard/explore', icon: '🔍' },
-        { name: 'Analyze', href: '/dashboard/analyze', icon: '⚡' },
-        { name: 'Candidates', href: '/dashboard/candidates', icon: '⭐' },
-        { name: 'Insights', href: '/dashboard/insights', icon: '🧠' },
-        { name: 'Alerts', href: '/dashboard/alerts', icon: '🔔' },
+        { name: 'Command', href: '/dashboard', icon: '🎯' },
+        { name: 'Market Proof', href: '/dashboard/market-proof', icon: '🛡️' },
+        { name: 'Shortlist', href: '/dashboard/shortlist', icon: '📋' },
+        { name: 'Live Tests', href: '/dashboard/live-tests', icon: '🔴' },
+        { name: 'Risk Check', href: '/dashboard/risk-check', icon: '⚠️' },
     ];
 
     const isActive = (href) => pathname === href;
@@ -37,16 +35,16 @@ export default function Sidebar() {
                             window.dispatchEvent(event);
                         }
                     }}
-                    className="flex items-center gap-2.5 group"
+                    className="group"
                 >
-                    <div className="w-9 h-9 bg-lime-500 rounded-lg flex items-center justify-center shadow-lg shadow-lime-500/20 group-hover:scale-105 transition-transform">
-                        <TrendingUp className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                        <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-none">
-                            TrendHawk
-                        </h1>
-                        <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider font-bold">Loss Prevention</p>
+                    <div className="flex items-center gap-2.5">
+                        <Logo className="w-9 h-9" iconOnly={true} />
+                        <div>
+                            <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-none">
+                                TrendHawk
+                            </h1>
+                            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider font-bold">Loss Prevention</p>
+                        </div>
                     </div>
                 </Link>
             </div>
@@ -69,7 +67,7 @@ export default function Sidebar() {
                             className={clsx(
                                 "flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm font-medium",
                                 active
-                                    ? "bg-lime-500 text-white shadow-md shadow-lime-500/20"
+                                    ? "bg-indigo-500 text-white shadow-md shadow-indigo-500/20"
                                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-forest-900/50"
                             )}
                         >
@@ -82,11 +80,11 @@ export default function Sidebar() {
 
             {/* Upgrade CTA */}
             <div className="px-3 mb-4">
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-lime-500/10 to-emerald-500/10 dark:from-lime-500/20 dark:to-emerald-500/20 border border-lime-500/20 relative overflow-hidden group">
-                    <div className="absolute -right-4 -top-4 w-16 h-16 bg-lime-500/10 rounded-full blur-2xl group-hover:bg-lime-500/20 transition-colors" />
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-emerald-500/10 dark:from-indigo-500/20 dark:to-emerald-500/20 border border-indigo-500/20 relative overflow-hidden group">
+                    <div className="absolute -right-4 -top-4 w-16 h-16 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-colors" />
 
                     <div className="flex items-center gap-2 mb-2 relative z-10">
-                        <div className="p-1.5 bg-lime-500 rounded-lg shadow-sm shadow-lime-500/20">
+                        <div className="p-1.5 bg-indigo-500 rounded-lg shadow-sm shadow-indigo-500/20">
                             <Crown className="w-3.5 h-3.5 text-white" />
                         </div>
                         <span className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">Pro Plan</span>
@@ -106,7 +104,7 @@ export default function Sidebar() {
                             }
                         }}
                     >
-                        <button className="w-full py-2.5 bg-lime-500 hover:bg-lime-600 active:scale-95 text-white text-[11px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md shadow-lime-500/20">
+                        <button className="w-full py-2.5 bg-indigo-500 hover:bg-indigo-600 active:scale-95 text-white text-[11px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md shadow-indigo-500/20">
                             Upgrade Now
                         </button>
                     </Link>
@@ -127,7 +125,7 @@ export default function Sidebar() {
                     className={clsx(
                         "flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm font-medium",
                         isActive('/dashboard/settings')
-                            ? "bg-lime-500 text-white shadow-md shadow-lime-500/20"
+                            ? "bg-indigo-500 text-white shadow-md shadow-indigo-500/20"
                             : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-forest-900/50"
                     )}
                 >
@@ -152,7 +150,7 @@ export default function Sidebar() {
                         <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
                             {user?.email?.split('@')[0] || 'User'}
                         </p>
-                        <p className="text-[10px] text-lime-600 dark:text-lime-400 font-bold uppercase tracking-tight">
+                        <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-tight">
                             {user?.user_metadata?.subscription_plan || 'FREE'} PLAN
                         </p>
                     </div>

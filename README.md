@@ -45,41 +45,31 @@ NEXT_PUBLIC_API_URL=https://your-backend-url.com/api
 NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_live_...
 ```
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 frontend/
-├── app/                    # Next.js 13+ App Router
+├── app/                    # Next.js 15+ App Router
 │   ├── (auth)/            # Auth pages (login, signup)
 │   ├── dashboard/         # Dashboard pages
-│   ├── checkout/          # Checkout page
-│   ├── layout.js          # Root layout
-│   └── page.js            # Landing page
 ├── components/            # Reusable components
-│   ├── ui/               # UI components (Button, Input)
-│   ├── Sidebar.js        # Dashboard sidebar
-│   ├── ProductCard.js    # Product card component
-│   └── Footer.js         # Footer component
-├── context/              # React contexts
-│   ├── AuthContext.js    # Authentication context
-│   └── ThemeContext.js   # Theme context
+├── docs/                 # Project documentation & guides (NEW)
+│   ├── database/        # Database schema & SQL
+├── lib/                  # Library configurations
 └── utils/                # Utility functions
-    └── api.js            # API client
 ```
 
 ## Features
 
-- ✅ Authentication (Login/Signup)
-- ✅ Dashboard with product research
-- ✅ Saved products
-- ✅ Dark mode
-- ✅ Responsive design
-- ✅ Stripe integration (ready)
+- ✅ Next.js 15+ & React 19 Performance
+- ✅ Full Supabase Integration
+- ✅ AI-Powered Candidate Insights
+- ✅ Case Scenario Simulator
+- ✅ Responsive Premium UI
 
 ## Tech Stack
 
-- Next.js 14
-- React 18
+- Next.js 15
+- React 19
 - Tailwind CSS
-- Framer Motion
-- Lucide Icons
+- Supabase

@@ -16,7 +16,7 @@ export function ConfirmModal({ isOpen, title, message, onConfirm, onCancel, conf
                     className="bg-white dark:bg-forest-900 w-full max-w-md rounded-3xl p-8 shadow-2xl border border-gray-100 dark:border-forest-800"
                 >
                     <div className="flex items-center justify-between mb-6">
-                        <div className={`p-3 rounded-2xl ${type === 'danger' ? 'bg-red-50 dark:bg-red-900/20 text-red-600' : 'bg-lime-50 dark:bg-lime-900/20 text-lime-600'}`}>
+                        <div className={`p-3 rounded-2xl ${type === 'danger' ? 'bg-red-50 dark:bg-red-900/20 text-red-600' : 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600'}`}>
                             <AlertCircle className="w-6 h-6" />
                         </div>
                         <button onClick={onCancel} className="p-2 hover:bg-gray-100 dark:hover:bg-forest-800 rounded-full transition-colors">

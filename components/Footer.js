@@ -12,10 +12,10 @@ export default function Footer() {
                     {/* Brand Section */}
                     <div className="space-y-6">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-gradient-to-br from-lime-400 to-lime-600 rounded-2xl flex items-center justify-center shadow-lg shadow-lime-500/20">
+                            <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
                                 <span className="text-2xl font-black text-forest-950">T</span>
                             </div>
-                            <span className="text-2xl font-black bg-gradient-to-r from-lime-400 to-lime-600 bg-clip-text text-transparent">
+                            <span className="text-2xl font-black bg-gradient-to-r from-indigo-400 to-indigo-600 bg-clip-text text-transparent">
                                 TrendHawk
                             </span>
                         </div>
@@ -32,11 +32,11 @@ export default function Footer() {
                                 <a
                                     key={i}
                                     href={social.href}
-                                    className="w-10 h-10 bg-forest-800/50 hover:bg-lime-500/10 border border-forest-700 hover:border-lime-500/30 rounded-xl flex items-center justify-center transition-all duration-300 group"
+                                    className="w-10 h-10 bg-forest-800/50 hover:bg-indigo-500/10 border border-forest-700 hover:border-indigo-500/30 rounded-xl flex items-center justify-center transition-all duration-300 group"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    <social.icon className="w-4 h-4 text-gray-400 group-hover:text-lime-400 transition-colors" />
+                                    <social.icon className="w-4 h-4 text-gray-400 group-hover:text-indigo-400 transition-colors" />
                                 </a>
                             ))}
                         </div>
@@ -57,9 +57,9 @@ export default function Footer() {
                                 <li key={item.name}>
                                     <Link
                                         href={item.href}
-                                        className="text-gray-400 hover:text-lime-400 transition-colors text-sm flex items-center gap-2 group font-medium"
+                                        className="text-gray-400 hover:text-indigo-400 transition-colors text-sm flex items-center gap-2 group font-medium"
                                     >
-                                        <span className="w-1 h-1 bg-lime-500 rounded-full opacity-0 group-hover:opacity-100 transition-all transform group-hover:scale-150" />
+                                        <span className="w-1 h-1 bg-indigo-500 rounded-full opacity-0 group-hover:opacity-100 transition-all transform group-hover:scale-150" />
                                         {item.name}
                                     </Link>
                                 </li>
@@ -81,9 +81,9 @@ export default function Footer() {
                                 <li key={item.name}>
                                     <Link
                                         href={item.href}
-                                        className="text-gray-400 hover:text-lime-400 transition-colors text-sm flex items-center gap-2 group font-medium"
+                                        className="text-gray-400 hover:text-indigo-400 transition-colors text-sm flex items-center gap-2 group font-medium"
                                     >
-                                        <span className="w-1 h-1 bg-lime-500 rounded-full opacity-0 group-hover:opacity-100 transition-all transform group-hover:scale-150" />
+                                        <span className="w-1 h-1 bg-indigo-500 rounded-full opacity-0 group-hover:opacity-100 transition-all transform group-hover:scale-150" />
                                         {item.name}
                                     </Link>
                                 </li>
@@ -96,25 +96,25 @@ export default function Footer() {
                         <h3 className="text-white font-bold text-lg mb-6">Get in Touch</h3>
                         <ul className="space-y-4">
                             <li className="flex items-start gap-3 text-sm">
-                                <Mail className="w-5 h-5 text-lime-400 mt-0.5 flex-shrink-0" />
+                                <Mail className="w-5 h-5 text-indigo-400 mt-0.5 flex-shrink-0" />
                                 <div>
                                     <p className="text-gray-400">Email us at</p>
-                                    <a href="mailto:hello@trendhawk.com" className="text-white hover:text-lime-400 transition-colors">
+                                    <a href="mailto:hello@trendhawk.com" className="text-white hover:text-indigo-400 transition-colors">
                                         hello@trendhawk.com
                                     </a>
                                 </div>
                             </li>
                             <li className="flex items-start gap-3 text-sm">
-                                <Phone className="w-5 h-5 text-lime-400 mt-0.5 flex-shrink-0" />
+                                <Phone className="w-5 h-5 text-indigo-400 mt-0.5 flex-shrink-0" />
                                 <div>
                                     <p className="text-gray-400">Call us</p>
-                                    <a href="tel:+1234567890" className="text-white hover:text-lime-400 transition-colors">
+                                    <a href="tel:+1234567890" className="text-white hover:text-indigo-400 transition-colors">
                                         +1 (234) 567-890
                                     </a>
                                 </div>
                             </li>
                             <li className="flex items-start gap-3 text-sm">
-                                <MapPin className="w-5 h-5 text-lime-400 mt-0.5 flex-shrink-0" />
+                                <MapPin className="w-5 h-5 text-indigo-400 mt-0.5 flex-shrink-0" />
                                 <div>
                                     <p className="text-gray-400">Visit us</p>
                                     <p className="text-white">San Francisco, CA</p>
@@ -133,13 +133,13 @@ export default function Footer() {
                             © {currentYear} TrendHawk. All rights reserved.
                         </p>
                         <div className="flex gap-6 text-sm">
-                            <Link href="#" className="text-gray-500 hover:text-lime-400 transition-colors">
+                            <Link href="#" className="text-gray-500 hover:text-indigo-400 transition-colors">
                                 Privacy Policy
                             </Link>
-                            <Link href="#" className="text-gray-500 hover:text-lime-400 transition-colors">
+                            <Link href="#" className="text-gray-500 hover:text-indigo-400 transition-colors">
                                 Terms of Service
                             </Link>
-                            <Link href="#" className="text-gray-500 hover:text-lime-400 transition-colors">
+                            <Link href="#" className="text-gray-500 hover:text-indigo-400 transition-colors">
                                 Cookie Policy
                             </Link>
                         </div>
@@ -148,7 +148,7 @@ export default function Footer() {
             </div>
 
             {/* Decorative Gradient */}
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-lime-500/20 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
         </footer>
     );
 }

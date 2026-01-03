@@ -3,7 +3,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Sidebar from '@/components/Sidebar';
-import { Menu, X, TrendingUp } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
+import Logo from '@/components/Logo';
 
 export default function DashboardLayout({ children }) {
     const { user, loading } = useAuth();
@@ -26,7 +27,7 @@ export default function DashboardLayout({ children }) {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black">
-                <div className="text-lime-500 font-poppins">Loading...</div>
+                <div className="text-indigo-500 font-poppins">Loading...</div>
             </div>
         );
     }
@@ -69,16 +70,14 @@ export default function DashboardLayout({ children }) {
                             )}
                         </button>
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-lime-500 rounded-lg flex items-center justify-center shadow-lg shadow-lime-500/20">
-                                <TrendingUp className="w-4 h-4 text-white" />
-                            </div>
+                            <Logo className="w-8 h-8" iconOnly={true} />
                             <span className="font-bold text-gray-900 dark:text-white tracking-tight">TrendHawk</span>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                         {/* User Initials/Avatar for mobile header */}
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-lime-400 to-emerald-500 flex items-center justify-center text-[10px] font-black text-white shadow-sm">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-400 to-indigo-500 flex items-center justify-center text-[10px] font-black text-white shadow-sm">
                             {user?.email?.charAt(0).toUpperCase()}
                         </div>
                     </div>

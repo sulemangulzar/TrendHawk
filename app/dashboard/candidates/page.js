@@ -12,7 +12,7 @@ export default function TestCandidatesPage() {
     const { showToast } = useToast();
     const [candidates, setCandidates] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, id: null });
+    const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, id: null, type: 'decision' }); // type can be 'decision' or 'product'
 
     useEffect(() => {
         if (user) {
@@ -64,7 +64,34 @@ export default function TestCandidatesPage() {
         }
     };
 
-    const removeCandidate = async () => {
+    const deleteProductCompletely = async (productId) => {
+        try {
+            const res = await fetch(`/api/products/${productId}?userId=${user.id}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                // If it was in candidates, remove those too
+                setCandidates(prev => prev.filter(c => c.product?.id !== productId));
+                showToast('Product deleted permanently', 'success');
+            } else {
+                const data = await res.json();
+                showToast(data.error || 'Failed to delete product', 'error');
+            }
+        } catch (error) {
+            console.error('Hard delete error:', error);
+            showToast('Error deleting product', 'error');
+        } finally {
+            setConfirmDelete({ isOpen: false, id: null, type: 'decision' });
+        }
+    };
+
+    const confirmAction = async () => {
+        if (confirmDelete.type === 'product') {
+            await deleteProductCompletely(confirmDelete.id);
+            return;
+        }
+
         const decisionId = confirmDelete.id;
         console.log('[DEBUG] CONFIRM DELETE ID:', decisionId);
 
@@ -102,11 +129,13 @@ export default function TestCandidatesPage() {
             {/* Confirm Delete Modal */}
             <ConfirmModal
                 isOpen={confirmDelete.isOpen}
-                title="Remove Candidate?"
-                message="This will permanently remove this product from your test list. You can always re-analyze and save it again."
-                confirmText="Remove"
-                onConfirm={removeCandidate}
-                onCancel={() => setConfirmDelete({ isOpen: false, id: null })}
+                title={confirmDelete.type === 'product' ? "Delete Product Forever?" : "Remove Candidate?"}
+                message={confirmDelete.type === 'product'
+                    ? "This will permanently delete this product and all its analysis from TrendHawk. This cannot be undone."
+                    : "This will remove this product from your test list. You can always re-analyze and save it again."}
+                confirmText={confirmDelete.type === 'product' ? "Delete Forever" : "Remove"}
+                onConfirm={confirmAction}
+                onCancel={() => setConfirmDelete({ isOpen: false, id: null, type: 'decision' })}
             />
 
             {/* Header */}
@@ -121,7 +150,7 @@ export default function TestCandidatesPage() {
                     </p>
                 </div>
                 <Link href="/dashboard/analyze" className="w-full md:w-auto flex justify-center md:justify-end">
-                    <Button variant="premium" className="h-14 w-full md:w-auto md:px-8 shadow-xl shadow-lime-500/20 text-lg">
+                    <Button variant="premium" className="h-14 w-full md:w-auto md:px-8 shadow-xl shadow-indigo-500/20 text-lg">
                         <Search className="w-5 h-5 mr-2" />
                         Analyze More
                     </Button>
@@ -136,7 +165,7 @@ export default function TestCandidatesPage() {
                     {
                         label: 'Avg Profit Potential',
                         value: `$${candidates.length > 0 ? Math.round(candidates.reduce((sum, c) => sum + (c.product?.profit_average_case || 0), 0) / candidates.length) : 0}`,
-                        color: 'text-lime-600 dark:text-lime-400'
+                        color: 'text-indigo-600 dark:text-indigo-400'
                     }
                 ].map((stat, i) => (
                     <div key={i} className="bg-white dark:bg-forest-900/40 border border-gray-100 dark:border-forest-800 rounded-3xl p-6 shadow-sm text-center">
@@ -149,7 +178,7 @@ export default function TestCandidatesPage() {
             {/* Candidates List */}
             {loading ? (
                 <div className="flex items-center justify-center h-64">
-                    <div className="animate-spin w-12 h-12 border-4 border-lime-500 border-t-transparent rounded-full"></div>
+                    <div className="animate-spin w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full"></div>
                 </div>
             ) : candidates.length === 0 ? (
                 <div className="text-center py-24 bg-white dark:bg-forest-900/20 rounded-[40px] border-2 border-dashed border-gray-200 dark:border-forest-800">
@@ -164,7 +193,7 @@ export default function TestCandidatesPage() {
                     </p>
                     <div className="flex justify-center mt-10">
                         <Link href="/dashboard/analyze">
-                            <Button variant="premium" className="px-12 h-16 text-xl rounded-2xl shadow-xl shadow-lime-500/20 hover:scale-105 transition-transform">
+                            <Button variant="premium" className="px-12 h-16 text-xl rounded-2xl shadow-xl shadow-indigo-500/20 hover:scale-105 transition-transform">
                                 <span className="text-3xl mr-3">⚡</span>
                                 Start Researching
                             </Button>
@@ -177,7 +206,8 @@ export default function TestCandidatesPage() {
                         <CandidateCard
                             key={candidate.id}
                             candidate={candidate}
-                            onRemove={(id) => setConfirmDelete({ isOpen: true, id })}
+                            onRemove={(id) => setConfirmDelete({ isOpen: true, id, type: 'decision' })}
+                            onHardDelete={(id) => setConfirmDelete({ isOpen: true, id, type: 'product' })}
                             handleStatusUpdate={handleStatusUpdate}
                         />
                     ))}
@@ -187,7 +217,7 @@ export default function TestCandidatesPage() {
     );
 }
 
-function CandidateCard({ candidate, onRemove, handleStatusUpdate }) {
+function CandidateCard({ candidate, onRemove, onHardDelete, handleStatusUpdate }) {
     const product = candidate.product;
     if (!product) return null;
 
@@ -197,22 +227,13 @@ function CandidateCard({ candidate, onRemove, handleStatusUpdate }) {
     return (
         <div className={`bg-white dark:bg-forest-900/40 border rounded-3xl overflow-hidden transition-all duration-300 ${isWinner ? 'border-green-500 shadow-xl shadow-green-500/10 ring-2 ring-green-500/20' :
             isFailure ? 'border-red-500/50 shadow-lg shadow-red-500/5 opacity-60' :
-                'border-gray-200 dark:border-forest-800 hover:shadow-2xl hover:border-lime-500/30 shadow-md'
+                'border-gray-200 dark:border-forest-800 hover:shadow-2xl hover:border-indigo-500/30 shadow-md'
             }`}>
 
             {/* Header Section */}
             <div className="p-6 md:p-8 pb-0">
                 <div className="flex flex-col md:flex-row gap-6 mb-6">
-                    {/* Product Image */}
-                    {product.image_url && (
-                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-forest-800 dark:to-forest-900 rounded-2xl p-4 w-full md:w-32 h-32 flex-shrink-0 flex items-center justify-center border border-gray-200 dark:border-forest-700 overflow-hidden group">
-                            <img
-                                src={product.image_url}
-                                alt={product.title}
-                                className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
-                            />
-                        </div>
-                    )}
+                    {/* Title and Badges */}
 
                     {/* Title and Badges */}
                     <div className="flex-1 min-w-0">
@@ -248,9 +269,9 @@ function CandidateCard({ candidate, onRemove, handleStatusUpdate }) {
                             ${product.profit_worst_case}
                         </p>
                     </div>
-                    <div className="bg-gradient-to-br from-lime-50 to-lime-100/50 dark:from-lime-900/20 dark:to-lime-900/10 rounded-xl p-4 border border-lime-200/50 dark:border-lime-800/50">
+                    <div className="bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/20 dark:to-indigo-900/10 rounded-xl p-4 border border-indigo-200/50 dark:border-indigo-800/50">
                         <p className="text-[10px] uppercase font-black text-gray-500 dark:text-gray-400 tracking-wider mb-1.5">Average</p>
-                        <p className="text-2xl font-black text-lime-600 dark:text-lime-400">${product.profit_average_case}</p>
+                        <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400">${product.profit_average_case}</p>
                     </div>
                     <div className="bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-900/10 rounded-xl p-4 border border-green-200/50 dark:border-green-800/50">
                         <p className="text-[10px] uppercase font-black text-gray-500 dark:text-gray-400 tracking-wider mb-1.5">Best</p>
@@ -265,9 +286,16 @@ function CandidateCard({ candidate, onRemove, handleStatusUpdate }) {
                     {/* Primary Actions Group */}
                     <div className="flex flex-col sm:flex-row gap-3 lg:flex-1">
                         <Link href={`/dashboard/product/${product.id}`} className="flex-1">
-                            <button className="w-full h-12 px-6 bg-white dark:bg-forest-900 border-2 border-gray-300 dark:border-forest-700 text-gray-900 dark:text-white rounded-xl font-bold text-sm hover:border-lime-500 hover:bg-lime-50 dark:hover:bg-lime-900/10 transition-all flex items-center justify-center gap-2 group">
+                            <button className="w-full h-12 px-6 bg-white dark:bg-forest-900 border-2 border-gray-300 dark:border-forest-700 text-gray-900 dark:text-white rounded-xl font-bold text-sm hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-all flex items-center justify-center gap-2 group">
                                 <span className="text-lg group-hover:scale-110 transition-transform">📊</span>
-                                Full Analysis
+                                Analysis
+                            </button>
+                        </Link>
+
+                        <Link href={`/dashboard/simulator?productId=${product.id}`} className="flex-1">
+                            <button className="w-full h-12 px-6 bg-white dark:bg-forest-900 border-2 border-gray-300 dark:border-forest-700 text-gray-900 dark:text-white rounded-xl font-bold text-sm hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-all flex items-center justify-center gap-2 group">
+                                <span className="text-lg group-hover:scale-110 transition-transform">🎮</span>
+                                Simulate
                             </button>
                         </Link>
 
@@ -305,13 +333,24 @@ function CandidateCard({ candidate, onRemove, handleStatusUpdate }) {
                         </button>
                         <button
                             onClick={() => {
+                                console.log('[DEBUG] CLICK HARD DELETE - Product ID:', product.id);
+                                onHardDelete(product.id);
+                            }}
+                            className="w-12 h-12 flex items-center justify-center bg-white dark:bg-forest-900 border-2 border-gray-300 dark:border-forest-700 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-400 dark:hover:border-red-600 rounded-xl transition-all group"
+                            title="Delete Product Forever"
+                        >
+                            <Trash2 className="w-5 h-5 group-hover:scale-110 group-hover:fill-red-500/10 transition-all" />
+                        </button>
+
+                        <button
+                            onClick={() => {
                                 console.log('[DEBUG] CLICK REMOVE - Candidate ID:', candidate.id);
                                 onRemove(candidate.id);
                             }}
-                            className="w-12 h-12 flex items-center justify-center bg-white dark:bg-forest-900 border-2 border-gray-300 dark:border-forest-700 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700 rounded-xl transition-all group"
+                            className="w-12 h-12 flex items-center justify-center bg-white dark:bg-forest-900 border-2 border-gray-300 dark:border-forest-700 text-gray-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:border-orange-300 dark:hover:border-orange-700 rounded-xl transition-all group"
                             title="Remove from Candidates"
                         >
-                            <Trash2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            <XCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
                         </button>
                     </div>
                 </div>

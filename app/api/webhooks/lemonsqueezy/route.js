@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export async function POST(request) {
     try {
@@ -74,7 +74,7 @@ export async function POST(request) {
 async function handleOrderCreated(data, userId) {
     console.log('Processing order for user:', userId);
 
-    const { data: user, error } = await supabase.auth.admin.getUserById(userId);
+    const { data: { user }, error } = await supabaseAdmin.auth.admin.getUserById(userId);
 
     if (error) {
         console.error('Error fetching user:', error);
@@ -82,7 +82,7 @@ async function handleOrderCreated(data, userId) {
     }
 
     // Update user metadata with order info
-    await supabase.auth.admin.updateUserById(userId, {
+    await supabaseAdmin.auth.admin.updateUserById(userId, {
         user_metadata: {
             ...user.user_metadata,
             last_order: {
@@ -106,11 +106,11 @@ async function handleSubscriptionCreated(data, userId) {
     const proVariantId = process.env.NEXT_PUBLIC_LEMONSQUEEZY_PRO_VARIANT_ID;
 
     let plan = 'free';
-    if (variantId === basicVariantId) plan = 'basic';
-    if (variantId === proVariantId) plan = 'pro';
+    if (variantId?.toString() === basicVariantId?.toString()) plan = 'basic';
+    if (variantId?.toString() === proVariantId?.toString()) plan = 'pro';
 
     // Update user metadata
-    await supabase.auth.admin.updateUserById(userId, {
+    await supabaseAdmin.auth.admin.updateUserById(userId, {
         user_metadata: {
             subscription: {
                 plan,
@@ -129,9 +129,9 @@ async function handleSubscriptionUpdated(data, userId) {
 
     const attributes = data.attributes;
 
-    const { data: user } = await supabase.auth.admin.getUserById(userId);
+    const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(userId);
 
-    await supabase.auth.admin.updateUserById(userId, {
+    await supabaseAdmin.auth.admin.updateUserById(userId, {
         user_metadata: {
             ...user.user_metadata,
             subscription: {
@@ -147,9 +147,9 @@ async function handleSubscriptionUpdated(data, userId) {
 async function handleSubscriptionCancelled(data, userId) {
     console.log('Cancelling subscription for user:', userId);
 
-    const { data: user } = await supabase.auth.admin.getUserById(userId);
+    const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(userId);
 
-    await supabase.auth.admin.updateUserById(userId, {
+    await supabaseAdmin.auth.admin.updateUserById(userId, {
         user_metadata: {
             ...user.user_metadata,
             subscription: {

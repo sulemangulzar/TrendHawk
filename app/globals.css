@@ -1,23 +1,26 @@
 @import "tailwindcss";
 
 @theme {
+  /* Updated: 2026-01-02 - Indigo color scheme */
   /* Override sans font to Poppins */
   --font-sans: var(--font-poppins), sans-serif;
 
-  /* CUSTOM USER GREEN PALETTE (#c1ee46 base) */
-  --color-lime-50: #fdffef;
-  --color-lime-100: #f6ffcd;
-  --color-lime-200: #ecff9a;
-  --color-lime-300: #e1ff63;
-  --color-lime-400: #d2f654;
-  --color-lime-500: #c1ee46;
+  /* INDIGO PRIMARY PALETTE (replacing lime) */
+  --color-indigo-50: #eef2ff;
+  --color-indigo-100: #e0e7ff;
+  --color-indigo-200: #c7d2fe;
+  --color-indigo-300: #a5b4fc;
+  --color-indigo-400: #818cf8;
+  --color-indigo-500: #6366f1;
   /* PRIMARY USER COLOR */
-  --color-lime-600: #9acc1f;
+  --color-indigo-600: #4f46e5;
   /* Darker for hover */
-  --color-lime-700: #759e13;
-  --color-lime-800: #5c7b13;
-  --color-lime-900: #4a6215;
-  --color-lime-950: #263506;
+  --color-indigo-700: #4338ca;
+  --color-indigo-800: #3730a3;
+  --color-indigo-900: #312e81;
+  --color-indigo-950: #1e1b4b;
+
+  /* Removed lime mappings - switching to unified indigo scheme */
 
   /* Neutral Grays - Clean */
   --color-forest-50: #f8fafc;
@@ -119,16 +122,16 @@ select {
     @apply bg-black text-white;
   }
 
-  /* Override primary buttons to have dark text because #c1ee46 is light */
-  /* This ensures accessibility on the bright lime buttons */
-  .bg-lime-500 {
-    color: #1a2e05 !important;
-    /* Dark text on bright lime */
+  /* Indigo buttons have white text for good contrast */
+  .bg-indigo-500,
+  .bg-indigo-600 {
+    color: white !important;
     font-weight: 600;
   }
 
-  .dark .bg-lime-500 {
-    color: #1a2e05 !important;
+  .dark .bg-indigo-500,
+  .dark .bg-indigo-600 {
+    color: white !important;
   }
 }
 

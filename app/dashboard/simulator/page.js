@@ -1,5 +1,7 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import {
     Calculator,
     TrendingUp,
@@ -8,16 +10,56 @@ import {
     AlertCircle,
     ArrowRight,
     PieChart,
-    BarChart
+    BarChart,
+    Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import clsx from 'clsx';
+import { useToast } from '@/context/ToastContext';
 
 export default function SimulatorPage() {
+    const searchParams = useSearchParams();
+    const productId = searchParams.get('productId');
+    const { showToast } = useToast();
+
     const [cost, setCost] = useState(15);
     const [price, setPrice] = useState(45);
     const [ads, setAds] = useState(15);
     const [returnRate, setReturnRate] = useState(5);
+    const [productName, setProductName] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (productId) {
+            fetchProductData();
+        }
+    }, [productId]);
+
+    const fetchProductData = async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('products')
+                .select('*')
+                .eq('id', productId)
+                .single();
+
+            if (error) throw error;
+
+            if (data) {
+                setProductName(data.title);
+                setPrice(parseFloat(data.price) || 45);
+                setCost(data.estimated_cost || (parseFloat(data.price) * 0.3) || 15);
+                setAds(parseFloat(data.price) * 0.35 || 15); // Default to avg ad spend
+                showToast(`Loaded data for: ${data.title.substring(0, 20)}...`, 'success');
+            }
+        } catch (error) {
+            console.error('Error fetching product for simulator:', error);
+            showToast('Could not load specific product data', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Calculations
     const totalCost = cost + ads + (price * (returnRate / 100));
@@ -57,7 +99,7 @@ export default function SimulatorPage() {
                 {/* Controls */}
                 <div className="lg:col-span-1 space-y-6 bg-white dark:bg-forest-900/40 border border-gray-200 dark:border-forest-800 rounded-3xl p-8">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <Calculator className="w-5 h-5 text-lime-500" />
+                        <Calculator className="w-5 h-5 text-indigo-500" />
                         Variables
                     </h2>
 
@@ -108,7 +150,7 @@ export default function SimulatorPage() {
                             </div>
                             <div className="text-right">
                                 <p className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-1">Profit Margin</p>
-                                <p className="text-3xl font-bold text-lime-600">{margin.toFixed(1)}%</p>
+                                <p className="text-3xl font-bold text-indigo-600">{margin.toFixed(1)}%</p>
                             </div>
                         </div>
 
@@ -145,7 +187,7 @@ export default function SimulatorPage() {
                             <BreakdownRow label="Returns & Handling" amount={price * (returnRate / 100)} color="bg-red-500" total={price} />
                             <div className="pt-4 mt-4 border-t border-gray-100 dark:border-forest-800 flex justify-between items-center">
                                 <span className="font-bold text-gray-900 dark:text-white">Net Profit</span>
-                                <span className="text-2xl font-black text-lime-600">${profit.toFixed(2)}</span>
+                                <span className="text-2xl font-black text-indigo-600">${profit.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
@@ -173,7 +215,7 @@ function SliderControl({ label, value, onChange, min, max }) {
             <div className="flex justify-between items-center mb-1">
                 <label className="text-sm font-extrabold text-gray-700 dark:text-gray-300 uppercase tracking-wider">{label}</label>
                 <div className="relative">
-                    <span className="absolute left-2 top-1 text-xs text-lime-600 font-bold">$</span>
+                    <span className="absolute left-2 top-1 text-xs text-indigo-600 font-bold">$</span>
                     <input
                         type="number"
                         value={value}
@@ -182,7 +224,7 @@ function SliderControl({ label, value, onChange, min, max }) {
                             "w-20 pl-4 pr-1 py-1 text-right font-black rounded-lg border focus:outline-none focus:ring-2 text-sm no-spinner transition-all",
                             value >= max
                                 ? "text-amber-600 bg-amber-50 dark:bg-amber-900/20 border-amber-500/20 focus:ring-amber-500"
-                                : "text-lime-600 bg-lime-50 dark:bg-lime-900/20 border-lime-500/20 focus:ring-lime-50"
+                                : "text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 border-indigo-500/20 focus:ring-indigo-50"
                         )}
                         inputMode="decimal"
                     />
@@ -195,7 +237,7 @@ function SliderControl({ label, value, onChange, min, max }) {
                 step={max > 500 ? 5 : 1}
                 value={Math.min(value, max)}
                 onChange={(e) => onChange(parseFloat(e.target.value))}
-                className="w-full h-1.5 bg-gray-100 dark:bg-forest-800 rounded-lg appearance-none cursor-pointer accent-lime-500"
+                className="w-full h-1.5 bg-gray-100 dark:bg-forest-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
             />
             <div className="flex justify-between text-[10px] text-gray-400 font-bold">
                 <span>{min}</span>

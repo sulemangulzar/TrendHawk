@@ -38,7 +38,7 @@ export default function SavedProductsPage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-black p-6 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-lime-600 animate-spin" />
+                <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
             </div>
         );
     }

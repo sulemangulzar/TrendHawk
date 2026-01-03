@@ -2,9 +2,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Check, Zap, Crown, TrendingUp } from 'lucide-react';
+import { Check, Zap, Crown } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
+import Logo from '@/components/Logo';
 
 export default function PricingPage() {
     const { user } = useAuth();
@@ -16,13 +17,13 @@ export default function PricingPage() {
         {
             name: 'Free',
             price: billingCycle === 'monthly' ? 0 : 0,
-            description: 'Perfect for trying out TrendHawk',
+            description: 'Test TrendHawk risk-free',
             features: [
-                '5 product searches per month',
-                'Cached data only',
-                'Profit calculator',
-                'Unlimited favorites',
-                'Basic analytics'
+                '5 Risk Checks per month',
+                'Market Proof browsing',
+                'Shortlist tracking',
+                'Basic profit calculator',
+                'Community support'
             ],
             limitations: [
                 'No supplier finder',
@@ -38,37 +39,35 @@ export default function PricingPage() {
         {
             name: 'Basic',
             price: billingCycle === 'monthly' ? 9 : 86,
-            description: 'Great for casual sellers',
+            description: 'For casual sellers testing products',
             features: [
-                '100 product searches per month',
-                'Live real-time data',
-                'Auto-link to verified suppliers',
+                '100 Risk Checks per month',
+                'Market Proof with seller repetition data',
+                'Shortlist management (watching/ready/rejected)',
+                'Live Tests tracking (up to 5 active)',
+                'Money protection stats',
                 'Profit calculator',
-                'Export to CSV',
-                'Unlimited favorites',
                 'Email support'
             ],
             cta: 'Upgrade to Basic',
-            href: '/checkout?plan=basic',
             popular: false
         },
         {
             name: 'Pro',
             price: billingCycle === 'monthly' ? 29 : 278,
-            description: 'For serious product researchers',
+            description: 'Stop losing money on bad products',
             features: [
-                '3,000 product searches per month',
-                'Live real-time data',
-                'Auto-link to verified suppliers',
-                'Profit calculator',
-                'Export to CSV',
-                'API access (50 requests/day)',
+                'Unlimited Risk Checks',
+                'Full Market Proof access',
+                'Unlimited Shortlist products',
+                'Unlimited Live Tests with auto recommendations',
+                'Money protection dashboard',
+                'Advanced profit scenarios (bull/base/bear)',
+                'Today\'s Action recommendations',
                 'Priority support',
-                'Advanced analytics',
                 'Early access to new features'
             ],
             cta: 'Upgrade to Pro',
-            href: '/checkout?plan=pro',
             popular: true
         }
     ];
@@ -114,9 +113,7 @@ export default function PricingPage() {
             <div className="bg-white dark:bg-forest-950 border-b border-gray-200 dark:border-forest-800">
                 <div className="max-w-7xl mx-auto px-4 py-6">
                     <Link href="/dashboard" className="flex items-center gap-3 w-fit">
-                        <div className="w-10 h-10 bg-lime-500 rounded-xl flex items-center justify-center">
-                            <TrendingUp className="w-6 h-6 text-white" />
-                        </div>
+                        <Logo className="w-10 h-10" />
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">TrendHawk</h1>
                     </Link>
                 </div>
@@ -129,7 +126,7 @@ export default function PricingPage() {
                         Choose Your Plan
                     </h1>
                     <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                        Select the perfect plan for your product research needs
+                        Stop losing money on bad products. Choose the plan that protects your wallet.
                     </p>
                 </div>
 
@@ -139,7 +136,7 @@ export default function PricingPage() {
                         <button
                             onClick={() => setBillingCycle('monthly')}
                             className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${billingCycle === 'monthly'
-                                ? 'bg-lime-500 text-white'
+                                ? 'bg-indigo-500 text-white'
                                 : 'text-gray-700 dark:text-gray-300'
                                 }`}
                         >
@@ -148,12 +145,12 @@ export default function PricingPage() {
                         <button
                             onClick={() => setBillingCycle('yearly')}
                             className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${billingCycle === 'yearly'
-                                ? 'bg-lime-500 text-white'
+                                ? 'bg-indigo-500 text-white'
                                 : 'text-gray-700 dark:text-gray-300'
                                 }`}
                         >
                             Yearly
-                            <span className="ml-2 text-xs bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400 px-2 py-0.5 rounded-full">
+                            <span className="ml-2 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-2 py-0.5 rounded-full">
                                 Save 20%
                             </span>
                         </button>
@@ -166,13 +163,13 @@ export default function PricingPage() {
                         <div
                             key={i}
                             className={`relative bg-white dark:bg-forest-900/40 border-2 rounded-2xl p-8 ${plan.popular
-                                ? 'border-lime-500 shadow-2xl shadow-lime-500/20'
+                                ? 'border-indigo-500 shadow-2xl shadow-indigo-500/20'
                                 : 'border-gray-200 dark:border-forest-800'
                                 }`}
                         >
                             {plan.popular && (
                                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                                    <span className="bg-gradient-to-r from-lime-500 to-lime-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
+                                    <span className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
                                         Most Popular
                                     </span>
                                 </div>
@@ -198,7 +195,7 @@ export default function PricingPage() {
                             <ul className="space-y-4 mb-8">
                                 {plan.features.map((feature, j) => (
                                     <li key={j} className="flex items-start gap-3">
-                                        <Check className="w-5 h-5 text-lime-600 dark:text-lime-400 flex-shrink-0 mt-0.5" />
+                                        <Check className="w-5 h-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-0.5" />
                                         <span className="text-sm text-gray-700 dark:text-gray-300">
                                             {feature}
                                         </span>
@@ -235,7 +232,7 @@ export default function PricingPage() {
                     <p className="text-gray-600 dark:text-gray-400 mb-4">
                         All plans include a 14-day money-back guarantee
                     </p>
-                    <Link href="/dashboard" className="text-lime-600 dark:text-lime-400 hover:underline font-semibold">
+                    <Link href="/dashboard" className="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">
                         ← Back to Dashboard
                     </Link>
                 </div>
