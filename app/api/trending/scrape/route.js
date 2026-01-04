@@ -1,41 +1,43 @@
-import { runTrendingEngine } from '@/lib/trendingEngine';
-import { generateMockTrendingProducts } from '@/lib/mockTrendingGenerator';
+import { NextResponse } from 'next/server';
+import AmazonScraper from '@/lib/scrapers/amazonScraper';
+import { supabase } from '@/lib/supabase';
+
+const amazonScraper = new AmazonScraper();
 
 export async function POST(request) {
     try {
         console.log('[API] Trending scrape triggered');
 
-        // Try real scraper first, fall back to mock data if it fails
-        let result;
-        try {
-            result = await runTrendingEngine();
-        } catch (scraperError) {
-            console.log('[API] Real scraper failed, using mock data:', scraperError.message);
-            const mockProducts = await generateMockTrendingProducts();
-            result = {
-                success: true,
-                productsScraped: mockProducts.length,
-                uniqueProducts: mockProducts.length,
-                duplicatesRemoved: 0,
-                verdicts: {
-                    hot: mockProducts.filter(p => p.verdict === 'Hot').length,
-                    rising: mockProducts.filter(p => p.verdict === 'Rising').length,
-                    watch: mockProducts.filter(p => p.verdict === 'Watch').length
-                },
-                duration: '0s',
-                usingMockData: true
-            };
+        const result = await amazonScraper.scrapeTrendingProducts('all', 10);
+
+        if (result.success) {
+            for (const product of result.products) {
+                const record = {
+                    name: product.title,
+                    normalized_name: product.title.toLowerCase().replace(/[^a-z0-9]/g, ''),
+                    price: product.price,
+                    product_url: product.product_url,
+                    source: 'Amazon',
+                    category: product.category,
+                    active_listings_count: product.seller_count,
+                    price_min: product.price,
+                    price_max: product.price,
+                    last_updated: new Date().toISOString()
+                };
+
+                await supabase.from('trending_products').upsert(record, { onConflict: 'product_url' });
+            }
         }
 
-        return Response.json({
+        return NextResponse.json({
             success: true,
-            message: `Successfully scraped ${result.productsScraped} products, saved ${result.uniqueProducts} unique items`,
+            productsScraped: result.products?.length || 0,
             ...result
         });
 
     } catch (error) {
         console.error('[API] Trending scraper error:', error);
-        return Response.json(
+        return NextResponse.json(
             {
                 success: false,
                 error: error.message
@@ -44,3 +46,4 @@ export async function POST(request) {
         );
     }
 }
+

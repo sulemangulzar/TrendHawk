@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { createCheckout } from '@lemonsqueezy/lemonsqueezy.js';
-import { configureLemonSqueezy, getVariantId } from '@/lib/lemonsqueezy';
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(request) {
     try {
@@ -13,46 +14,48 @@ export async function POST(request) {
             );
         }
 
-        // Configure Lemon Squeezy
-        configureLemonSqueezy();
+        // Define prices based on your Stripe dashboard
+        const prices = {
+            basic: process.env.STRIPE_BASIC_PRICE_ID,
+            pro: process.env.STRIPE_PRO_PRICE_ID,
+        };
 
-        // Get variant ID for the plan
-        const variantId = getVariantId(plan);
+        const priceId = prices[plan?.toLowerCase()];
 
-        if (!variantId) {
+        if (!priceId) {
             return NextResponse.json(
-                { error: 'Invalid plan selected' },
+                { error: 'Invalid plan selected or missing Price ID in environment' },
                 { status: 400 }
             );
         }
 
-        // Create checkout session
-        const storeId = process.env.LEMONSQUEEZY_STORE_ID;
-
-        const checkout = await createCheckout(storeId, variantId, {
-            checkoutData: {
-                email: userEmail,
-                custom: {
-                    user_id: userId,
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [
+                {
+                    price: priceId,
+                    quantity: 1,
                 },
+            ],
+            mode: 'subscription',
+            success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success`,
+            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?payment=cancelled`,
+            metadata: {
+                userId,
+                plan,
             },
-            productOptions: {
-                redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success`,
-            },
+            customer_email: userEmail,
         });
-
-        if (checkout.error) {
-            throw new Error(checkout.error.message);
-        }
 
         return NextResponse.json({
-            checkoutUrl: checkout.data.data.attributes.url,
+            checkoutUrl: session.url,
         });
     } catch (error) {
-        console.error('Error creating checkout:', error);
+        console.error('Error creating Stripe checkout:', error);
         return NextResponse.json(
             { error: 'Failed to create checkout session' },
             { status: 500 }
         );
     }
 }
+
