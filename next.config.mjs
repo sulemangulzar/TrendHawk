@@ -21,9 +21,8 @@ const nextConfig = {
   // Enable SWC minification (faster than Terser)
   swcMinify: true,
 
-  // Optimize CSS
+  // External packages for server components
   experimental: {
-    optimizeCss: true,
     serverComponentsExternalPackages: [
       'playwright-extra',
       'puppeteer-extra-plugin-stealth',
