@@ -37,11 +37,7 @@
   /* Very dark slate, close to black */
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Smooth scrolling for entire website */
+/* Base styles */
 html {
   scroll-behavior: smooth;
 }
@@ -133,10 +129,9 @@ select {
   .dark .bg-indigo-500,
   .dark .bg-indigo-600 {
     color: white !important;
+    @apply bg-indigo-600 text-white font-semibold;
   }
 }
-
-@custom-variant dark (&:where(.dark, .dark *));
 
 ::-webkit-scrollbar {
   width: 6px;
