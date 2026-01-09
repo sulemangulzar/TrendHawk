@@ -15,30 +15,8 @@ export default function PricingPage() {
 
     const plans = [
         {
-            name: 'Free',
-            price: billingCycle === 'monthly' ? 0 : 0,
-            description: 'Test TrendHawk risk-free',
-            features: [
-                '5 Risk Checks per month',
-                'Market Proof browsing',
-                'Shortlist tracking',
-                'Basic profit calculator',
-                'Community support'
-            ],
-            limitations: [
-                'No supplier finder',
-                'No CSV export',
-                'No API access',
-                'No support'
-            ],
-            cta: 'Current Plan',
-            href: '/dashboard',
-            popular: false,
-            disabled: true
-        },
-        {
             name: 'Basic',
-            price: billingCycle === 'monthly' ? 9 : 86,
+            price: billingCycle === 'monthly' ? 19 : 182,
             description: 'For casual sellers testing products',
             features: [
                 '100 Risk Checks per month',
@@ -54,10 +32,10 @@ export default function PricingPage() {
         },
         {
             name: 'Pro',
-            price: billingCycle === 'monthly' ? 29 : 278,
+            price: billingCycle === 'monthly' ? 49 : 470,
             description: 'Stop losing money on bad products',
             features: [
-                'Unlimited Risk Checks',
+                '450 Risk Checks per month',
                 'Full Market Proof access',
                 'Unlimited Shortlist products',
                 'Unlimited Live Tests with auto recommendations',

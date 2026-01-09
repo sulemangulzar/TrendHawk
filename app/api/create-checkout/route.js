@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+import { createCheckout } from '@lemonsqueezy/lemonsqueezy.js';
+import { initializeLemonSqueezy, getVariantId } from '@/lib/lemonsqueezy';
 
 export async function POST(request) {
     try {
@@ -14,46 +13,69 @@ export async function POST(request) {
             );
         }
 
-        // Define prices based on your Stripe dashboard
-        const prices = {
-            basic: process.env.STRIPE_BASIC_PRICE_ID,
-            pro: process.env.STRIPE_PRO_PRICE_ID,
-        };
+        // Initialize Lemon Squeezy
+        initializeLemonSqueezy();
 
-        const priceId = prices[plan?.toLowerCase()];
+        // Get the variant ID for the selected plan
+        const variantId = getVariantId(plan);
 
-        if (!priceId) {
+        if (!variantId) {
             return NextResponse.json(
-                { error: 'Invalid plan selected or missing Price ID in environment' },
+                { error: `Invalid plan selected or missing Variant ID for plan: ${plan}` },
                 { status: 400 }
             );
         }
 
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            line_items: [
-                {
-                    price: priceId,
-                    quantity: 1,
+        const storeId = process.env.LEMONSQUEEZY_STORE_ID;
+
+        if (!storeId) {
+            return NextResponse.json(
+                { error: 'Lemon Squeezy Store ID not configured' },
+                { status: 500 }
+            );
+        }
+
+        // Create checkout session with Lemon Squeezy
+        const checkout = await createCheckout(storeId, variantId, {
+            checkoutData: {
+                email: userEmail,
+                custom: {
+                    user_id: userId,
+                    plan: plan.toLowerCase(),
                 },
-            ],
-            mode: 'subscription',
-            success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success`,
-            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?payment=cancelled`,
-            metadata: {
-                userId,
-                plan,
             },
-            customer_email: userEmail,
+            checkoutOptions: {
+                embed: false,
+                media: true,
+                logo: true,
+            },
+            expiresAt: null,
+            preview: false,
+            testMode: process.env.NODE_ENV === 'development',
+        });
+
+        if (checkout.error) {
+            console.error('Lemon Squeezy checkout error:', checkout.error);
+            return NextResponse.json(
+                { error: 'Failed to create checkout session' },
+                { status: 500 }
+            );
+        }
+
+        console.log('[Checkout Created]', {
+            plan,
+            userId,
+            checkoutId: checkout.data?.id,
         });
 
         return NextResponse.json({
-            checkoutUrl: session.url,
+            checkoutUrl: checkout.data?.data?.attributes?.url,
+            checkoutId: checkout.data?.id,
         });
     } catch (error) {
-        console.error('Error creating Stripe checkout:', error);
+        console.error('Error creating Lemon Squeezy checkout:', error);
         return NextResponse.json(
-            { error: 'Failed to create checkout session' },
+            { error: 'Failed to create checkout session', details: error.message },
             { status: 500 }
         );
     }

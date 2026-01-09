@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic';
+
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -8,13 +10,6 @@ const supabase = createClient(
 
 // Plan limits
 const PLAN_LIMITS = {
-    free: {
-        searchesPerMonth: 5,
-        supplierAccess: false,
-        dataType: 'cached',
-        exportCSV: false,
-        apiAccess: false,
-    },
     basic: {
         searchesPerMonth: 100,
         supplierAccess: true,
@@ -23,7 +18,7 @@ const PLAN_LIMITS = {
         apiAccess: false,
     },
     pro: {
-        searchesPerMonth: 3000,
+        searchesPerMonth: 450,
         supplierAccess: true,
         dataType: 'realtime',
         exportCSV: true,
@@ -49,8 +44,8 @@ export async function GET(request) {
 
         if (userError) throw userError;
 
-        const userPlan = userData.user?.user_metadata?.subscription_plan || 'free';
-        const planLimits = PLAN_LIMITS[userPlan] || PLAN_LIMITS.free;
+        const userPlan = userData.user?.user_metadata?.subscription_plan || 'basic';
+        const planLimits = PLAN_LIMITS[userPlan] || PLAN_LIMITS.basic;
 
         // Get current month's search count
         const startOfMonth = new Date();

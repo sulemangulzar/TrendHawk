@@ -259,13 +259,13 @@ export default function LandingPage() {
               <div className="p-8 rounded-3xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/20 relative hover:shadow-lg transition-all">
                 <h3 className="text-xl font-black mb-1 text-gray-900 dark:text-white uppercase tracking-wider text-indigo-600">Early Bird</h3>
                 <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-4xl font-black text-gray-900 dark:text-white">$9</span>
+                  <span className="text-4xl font-black text-gray-900 dark:text-white">$19</span>
                   <span className="text-gray-500 font-bold">/mo</span>
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 font-medium">For innovators who want to grow with us. Lock in this price forever.</p>
 
                 <ul className="space-y-4 mb-8">
-                  <Feature text="5 Risk Checks per month" />
+                  <Feature text="100 Risk Checks per month" />
                   <Feature text="Market Proof access" />
                   <Feature text="Shortlist tracking" />
                   <Feature text="Basic profit calculator" />
@@ -282,13 +282,13 @@ export default function LandingPage() {
                 <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] font-black px-4 py-2 rounded-bl-2xl uppercase tracking-widest">Recommended</div>
                 <h3 className="text-xl font-black mb-1 text-gray-900 dark:text-white uppercase tracking-wider">Professional</h3>
                 <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-4xl font-black text-indigo-600 dark:text-indigo-500">$29</span>
+                  <span className="text-4xl font-black text-indigo-600 dark:text-indigo-500">$49</span>
                   <span className="text-gray-500 font-bold">/mo</span>
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 font-medium">For serious sellers who want to stop losing money on bad products.</p>
 
                 <ul className="space-y-4 mb-8">
-                  <Feature text="Unlimited Risk Checks" check />
+                  <Feature text="450 Risk Checks per month" check />
                   <Feature text="Live Tests tracking (scale/kill recommendations)" check />
                   <Feature text="Money protection stats" check />
                   <Feature text="Advanced profit scenarios" check />

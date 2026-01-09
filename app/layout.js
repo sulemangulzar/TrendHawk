@@ -10,12 +10,12 @@ const poppins = Poppins({
   display: 'swap',
 });
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
+
 export const metadata = {
-  title: 'TrendHawk - Professional E-commerce Product Research',
-  description: 'Find winning products across Amazon, eBay, and more. Use AI-driven analytics, profit simulators, and daily action plans to scale your e-commerce business.',
-  keywords: ['dropshipping', 'product research', 'ecommerce', 'amazon trends', 'ebay analytics', 'winning products'],
-  authors: [{ name: 'TrendHawk Team' }],
-  viewport: 'width=device-width, initial-scale=1',
   icons: {
     icon: [
       { url: '/favicon.png', sizes: '32x32', type: 'image/png' },

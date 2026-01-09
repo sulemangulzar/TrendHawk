@@ -82,12 +82,15 @@ export default function MarketProofPage() {
     return (
         <div className="space-y-6 font-poppins max-w-7xl mx-auto">
             {/* Header */}
-            <div>
-                <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-2">
-                    Market Proof
+            <div className="space-y-4 pt-4">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-full text-[11px] font-black uppercase tracking-[0.2em] mb-2">
+                    🌎 Global Data Mining
+                </div>
+                <h1 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-3">
+                    Market <span className="text-indigo-500">Explorer</span>
                 </h1>
-                <p className="text-gray-600 dark:text-gray-400 font-medium">
-                    Real sellers, real evidence - no guessing
+                <p className="text-gray-600 dark:text-gray-400 font-medium text-lg max-w-2xl">
+                    Uncover real sellers and verified product opportunities across global platforms.
                 </p>
             </div>
 
@@ -169,8 +172,8 @@ export default function MarketProofPage() {
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-600 dark:text-gray-400">Review growth:</span>
                                     <span className={`font-bold ${product.review_velocity === 'increasing' ? 'text-green-600' :
-                                            product.review_velocity === 'declining' ? 'text-red-600' :
-                                                'text-gray-600'
+                                        product.review_velocity === 'declining' ? 'text-red-600' :
+                                            'text-gray-600'
                                         }`}>
                                         {product.review_velocity === 'increasing' ? '↗ Increasing' :
                                             product.review_velocity === 'declining' ? '↘ Declining' :
@@ -181,8 +184,8 @@ export default function MarketProofPage() {
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-600 dark:text-gray-400">Seller repetition:</span>
                                     <span className={`font-bold ${product.seller_repetition === 'high' ? 'text-green-600' :
-                                            product.seller_repetition === 'low' ? 'text-red-600' :
-                                                'text-amber-600'
+                                        product.seller_repetition === 'low' ? 'text-red-600' :
+                                            'text-amber-600'
                                         }`}>
                                         {product.seller_repetition || 'Unknown'}
                                     </span>

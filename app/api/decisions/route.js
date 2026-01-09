@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic';
+
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -57,7 +59,7 @@ export async function POST(request) {
 
         // Check if decision already exists
         const { data: existing } = await supabase
-            .from('user_decisions')
+            .from('decisions')
             .select('id')
             .eq('user_id', userId)
             .eq('product_id', productId)
@@ -71,7 +73,7 @@ export async function POST(request) {
         }
 
         const { data, error } = await supabase
-            .from('user_decisions')
+            .from('decisions')
             .insert({
                 user_id: userId,
                 product_id: productId,
@@ -112,7 +114,7 @@ export async function GET(request) {
         }
 
         let query = supabase
-            .from('user_decisions')
+            .from('decisions')
             .select(`
                 id,
                 user_id,

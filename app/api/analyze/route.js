@@ -1,6 +1,8 @@
 // Updated Risk Check API to use REAL data from database
+// Enhanced to support URL-based analysis via Universal Scraper
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { analyzeMarket } from '@/lib/scraper';
 
 export async function POST(request) {
     try {
@@ -16,7 +18,64 @@ export async function POST(request) {
 
         console.log('[Risk Check] Analyzing:', input);
 
-        // Search for product in database
+        // Check if input is a URL
+        const isUrl = input.startsWith('http://') || input.startsWith('https://');
+
+        if (isUrl) {
+            // Use Universal Scraper for URL inputs
+            console.log('[Risk Check] Detected URL - using Universal Scraper');
+
+            try {
+                // Get market sample for competitor analysis
+                let marketSample = [];
+                try {
+                    const { data: products } = await supabase
+                        .from('trending_products')
+                        .select('price')
+                        .gt('price', 0)
+                        .limit(50);
+
+                    if (products && products.length > 0) {
+                        marketSample = products;
+                    }
+                } catch (dbError) {
+                    console.warn('[Risk Check] Could not fetch market sample:', dbError.message);
+                }
+
+                // Analyze using universal scraper
+                const analysis = await analyzeMarket(input, marketSample);
+
+                // Return in the format expected by frontend
+                return NextResponse.json({
+                    success: true,
+                    product: {
+                        title: analysis.product.title,
+                        price: analysis.product.price,
+                        price_min: analysis.product.price * 0.9, // Estimate range
+                        price_max: analysis.product.price * 1.1,
+                        demand_level: getDemandFromAnalysis(analysis),
+                        saturation_level: getSaturationFromAnalysis(analysis),
+                        common_failure_reason: analysis.recommendation,
+                        source: 'universal_scraper',
+                        // Include full analysis for enhanced display
+                        full_analysis: {
+                            competitor: analysis.competitor_analysis,
+                            profit: analysis.profit_analysis,
+                            risk: analysis.risk_analysis,
+                            trend: analysis.market_trends,
+                            recommendation: analysis.recommendation,
+                            meta: analysis.meta
+                        }
+                    }
+                });
+            } catch (scraperError) {
+                console.error('[Risk Check] Scraper error:', scraperError);
+                // Fall back to heuristics if scraper fails
+                return getFallbackAnalysis(input);
+            }
+        }
+
+        // Original logic for product name search
         const searchTerm = input.toLowerCase();
 
         const { data: products, error } = await supabase
@@ -61,6 +120,25 @@ export async function POST(request) {
             { status: 500 }
         );
     }
+}
+
+// Helper functions to convert universal scraper analysis to demand/saturation levels
+function getDemandFromAnalysis(analysis) {
+    const reviews = analysis.product.reviews || 0;
+    const rating = analysis.product.rating || 0;
+
+    if (reviews > 2000 && rating >= 4.3) return 'High';
+    if (reviews > 500 && rating >= 4.0) return 'Medium';
+    return 'Low';
+}
+
+function getSaturationFromAnalysis(analysis) {
+    const riskLevel = analysis.risk_analysis.risk_level;
+    const pricingPosition = analysis.competitor_analysis.pricing_position;
+
+    if (riskLevel === 'HIGH' || pricingPosition === 'OVERPRICED') return 'High';
+    if (riskLevel === 'MEDIUM') return 'Medium';
+    return 'Low';
 }
 
 // Calculate demand based on real data

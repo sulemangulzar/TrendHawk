@@ -16,6 +16,12 @@ const nextConfig = {
   // Optimize CSS
   experimental: {
     optimizeCss: true,
+    serverComponentsExternalPackages: [
+      'playwright-extra',
+      'puppeteer-extra-plugin-stealth',
+      'playwright',
+      '2captcha-api'
+    ],
   },
 
   // Headers for better caching

@@ -14,11 +14,10 @@ export default function Sidebar() {
     const { theme, toggleTheme } = useTheme();
 
     const navigation = [
-        { name: 'Command', href: '/dashboard', icon: '🎯' },
-        { name: 'Market Proof', href: '/dashboard/market-proof', icon: '🛡️' },
-        { name: 'Shortlist', href: '/dashboard/shortlist', icon: '📋' },
-        { name: 'Live Tests', href: '/dashboard/live-tests', icon: '🔴' },
-        { name: 'Risk Check', href: '/dashboard/risk-check', icon: '⚠️' },
+        { name: 'Intelligence Hub', href: '/dashboard', icon: '⚡' },
+        { name: 'Market Explorer', href: '/dashboard/market-proof', icon: '🌩️' },
+        { name: 'Live Proof', href: '/dashboard/proof', icon: '💎' },
+        { name: 'Winning Candidates', href: '/dashboard/candidates', icon: '🏆' },
     ];
 
     const isActive = (href) => pathname === href;
@@ -91,7 +90,7 @@ export default function Sidebar() {
                     </div>
 
                     <p className="text-[11px] text-gray-600 dark:text-gray-400 mb-3 leading-snug relative z-10">
-                        Unlock 3,000 searches and full API data access.
+                        Unlock 450 searches and professional market intelligence.
                     </p>
 
                     <Link

@@ -1,162 +1,272 @@
 import { NextResponse } from 'next/server';
-import crypto from 'crypto';
-import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { createClient } from '@supabase/supabase-js';
+import { verifyWebhookSignature, getPlanFromVariantId } from '@/lib/lemonsqueezy';
 
+export const dynamic = 'force-dynamic';
+
+// Create Supabase client with service role for admin operations
+const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+/**
+ * Lemon Squeezy Webhook Handler
+ * Processes subscription events and updates database
+ */
 export async function POST(request) {
     try {
+        // Get raw body for signature verification
         const rawBody = await request.text();
         const signature = request.headers.get('x-signature');
-        const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
-
-        if (!secret) {
-            console.error('LEMONSQUEEZY_WEBHOOK_SECRET is not set');
-            return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
-        }
 
         // Verify webhook signature
-        const hmac = crypto.createHmac('sha256', secret);
-        const digest = hmac.update(rawBody).digest('hex');
-
-        if (signature !== digest) {
-            console.error('Invalid webhook signature');
-            return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+        if (!signature || !verifyWebhookSignature(rawBody, signature)) {
+            console.error('[Webhook] Invalid signature');
+            return NextResponse.json(
+                { error: 'Invalid signature' },
+                { status: 401 }
+            );
         }
 
+        // Parse the webhook payload
         const payload = JSON.parse(rawBody);
-        const { meta, data } = payload;
-        const eventName = meta.event_name;
+        const eventName = payload.meta?.event_name;
+        const data = payload.data;
 
-        console.log('Webhook received:', eventName);
-
-        // Extract user ID from custom data
-        const userId = data.attributes.first_order_item?.product_id
-            ? data.meta?.custom_data?.user_id
-            : null;
-
-        if (!userId) {
-            console.error('No user ID found in webhook payload');
-            return NextResponse.json({ error: 'No user ID' }, { status: 400 });
-        }
+        console.log('[Webhook Received]', {
+            event: eventName,
+            subscriptionId: data?.id,
+        });
 
         // Handle different webhook events
         switch (eventName) {
-            case 'order_created':
-                await handleOrderCreated(data, userId);
-                break;
-
             case 'subscription_created':
-                await handleSubscriptionCreated(data, userId);
+                await handleSubscriptionCreated(data);
                 break;
 
             case 'subscription_updated':
-                await handleSubscriptionUpdated(data, userId);
+                await handleSubscriptionUpdated(data);
                 break;
 
             case 'subscription_cancelled':
-            case 'subscription_expired':
-                await handleSubscriptionCancelled(data, userId);
+                await handleSubscriptionCancelled(data);
+                break;
+
+            case 'subscription_payment_success':
+                await handlePaymentSuccess(data, payload);
+                break;
+
+            case 'subscription_payment_failed':
+                await handlePaymentFailed(data, payload);
                 break;
 
             default:
-                console.log('Unhandled event:', eventName);
+                console.log('[Webhook] Unhandled event:', eventName);
         }
 
         return NextResponse.json({ received: true });
     } catch (error) {
-        console.error('Webhook error:', error);
+        console.error('[Webhook Error]', error);
         return NextResponse.json(
-            { error: 'Webhook processing failed' },
+            { error: 'Webhook processing failed', details: error.message },
             { status: 500 }
         );
     }
 }
 
-async function handleOrderCreated(data, userId) {
-    console.log('Processing order for user:', userId);
+/**
+ * Handle subscription_created event
+ */
+async function handleSubscriptionCreated(data) {
+    const attributes = data.attributes;
+    const customData = attributes.custom_data || {};
+    const userId = customData.user_id;
+    const variantId = attributes.variant_id?.toString();
+    const planName = customData.plan || getPlanFromVariantId(variantId);
 
-    const { data: { user }, error } = await supabaseAdmin.auth.admin.getUserById(userId);
-
-    if (error) {
-        console.error('Error fetching user:', error);
+    if (!userId) {
+        console.error('[Webhook] No user_id in custom_data');
         return;
     }
 
-    // Update user metadata with order info
-    await supabaseAdmin.auth.admin.updateUserById(userId, {
-        user_metadata: {
-            ...user.user_metadata,
-            last_order: {
-                id: data.id,
-                total: data.attributes.total,
-                status: data.attributes.status,
-                created_at: data.attributes.created_at,
-            },
-        },
-    });
-}
+    // Insert subscription record
+    const { error: subError } = await supabase
+        .from('subscriptions')
+        .insert({
+            user_id: userId,
+            lemon_squeezy_id: data.id,
+            plan_name: planName,
+            status: attributes.status,
+            current_period_start: attributes.renews_at,
+            current_period_end: attributes.ends_at,
+        });
 
-async function handleSubscriptionCreated(data, userId) {
-    console.log('Activating subscription for user:', userId);
-
-    const attributes = data.attributes;
-    const variantId = attributes.variant_id;
-
-    // Determine plan based on variant ID
-    const basicVariantId = process.env.NEXT_PUBLIC_LEMONSQUEEZY_BASIC_VARIANT_ID;
-    const proVariantId = process.env.NEXT_PUBLIC_LEMONSQUEEZY_PRO_VARIANT_ID;
-
-    let plan = 'free';
-    if (variantId?.toString() === basicVariantId?.toString()) plan = 'basic';
-    if (variantId?.toString() === proVariantId?.toString()) plan = 'pro';
+    if (subError) {
+        console.error('[Webhook] Failed to create subscription:', subError);
+        return;
+    }
 
     // Update user metadata
-    await supabaseAdmin.auth.admin.updateUserById(userId, {
+    const { error: metaError } = await supabase.auth.admin.updateUserById(userId, {
         user_metadata: {
-            subscription: {
-                plan,
-                status: attributes.status,
-                lemon_squeezy_id: data.id,
-                variant_id: variantId,
-                renews_at: attributes.renews_at,
-                ends_at: attributes.ends_at,
-            },
+            subscription_plan: planName,
+            subscription_status: attributes.status,
         },
+    });
+
+    if (metaError) {
+        console.error('[Webhook] Failed to update user metadata:', metaError);
+    }
+
+    console.log('[Subscription Created]', {
+        userId,
+        plan: planName,
+        lemonSqueezyId: data.id,
     });
 }
 
-async function handleSubscriptionUpdated(data, userId) {
-    console.log('Updating subscription for user:', userId);
-
+/**
+ * Handle subscription_updated event
+ */
+async function handleSubscriptionUpdated(data) {
     const attributes = data.attributes;
+    const lemonSqueezyId = data.id;
 
-    const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(userId);
+    // Update subscription record
+    const { error } = await supabase
+        .from('subscriptions')
+        .update({
+            status: attributes.status,
+            current_period_start: attributes.renews_at,
+            current_period_end: attributes.ends_at,
+            cancel_at: attributes.cancelled ? attributes.ends_at : null,
+            updated_at: new Date().toISOString(),
+        })
+        .eq('lemon_squeezy_id', lemonSqueezyId);
 
-    await supabaseAdmin.auth.admin.updateUserById(userId, {
-        user_metadata: {
-            ...user.user_metadata,
-            subscription: {
-                ...user.user_metadata.subscription,
-                status: attributes.status,
-                renews_at: attributes.renews_at,
-                ends_at: attributes.ends_at,
-            },
-        },
+    if (error) {
+        console.error('[Webhook] Failed to update subscription:', error);
+        return;
+    }
+
+    console.log('[Subscription Updated]', {
+        lemonSqueezyId,
+        status: attributes.status,
     });
 }
 
-async function handleSubscriptionCancelled(data, userId) {
-    console.log('Cancelling subscription for user:', userId);
+/**
+ * Handle subscription_cancelled event
+ */
+async function handleSubscriptionCancelled(data) {
+    const attributes = data.attributes;
+    const lemonSqueezyId = data.id;
 
-    const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(userId);
+    // Update subscription to cancelled
+    const { data: subscription, error } = await supabase
+        .from('subscriptions')
+        .update({
+            status: 'cancelled',
+            cancelled_at: new Date().toISOString(),
+            cancel_at: attributes.ends_at,
+            updated_at: new Date().toISOString(),
+        })
+        .eq('lemon_squeezy_id', lemonSqueezyId)
+        .select()
+        .single();
 
-    await supabaseAdmin.auth.admin.updateUserById(userId, {
-        user_metadata: {
-            ...user.user_metadata,
-            subscription: {
-                ...user.user_metadata.subscription,
-                status: 'cancelled',
-                ends_at: data.attributes.ends_at,
+    if (error) {
+        console.error('[Webhook] Failed to cancel subscription:', error);
+        return;
+    }
+
+    // Update user metadata to reflect cancellation
+    if (subscription) {
+        await supabase.auth.admin.updateUserById(subscription.user_id, {
+            user_metadata: {
+                subscription_status: 'cancelled',
             },
-        },
+        });
+    }
+
+    console.log('[Subscription Cancelled]', {
+        lemonSqueezyId,
+        endsAt: attributes.ends_at,
+    });
+}
+
+/**
+ * Handle subscription_payment_success event
+ */
+async function handlePaymentSuccess(data, payload) {
+    const attributes = data.attributes;
+    const lemonSqueezyId = data.id;
+
+    // Get subscription to find user_id
+    const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('user_id, id')
+        .eq('lemon_squeezy_id', lemonSqueezyId)
+        .single();
+
+    if (!subscription) {
+        console.error('[Webhook] Subscription not found for payment');
+        return;
+    }
+
+    // Record payment in history
+    const paymentId = payload.meta?.custom_data?.payment_id || `payment_${Date.now()}`;
+
+    const { error } = await supabase
+        .from('payment_history')
+        .insert({
+            user_id: subscription.user_id,
+            subscription_id: subscription.id,
+            lemon_squeezy_payment_id: paymentId,
+            amount: parseFloat(attributes.total || 0) / 100, // Convert cents to dollars
+            currency: attributes.currency || 'USD',
+            status: 'succeeded',
+        });
+
+    if (error) {
+        console.error('[Webhook] Failed to record payment:', error);
+    }
+
+    console.log('[Payment Success]', {
+        subscriptionId: lemonSqueezyId,
+        amount: attributes.total,
+    });
+}
+
+/**
+ * Handle subscription_payment_failed event
+ */
+async function handlePaymentFailed(data, payload) {
+    const lemonSqueezyId = data.id;
+
+    // Get subscription
+    const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('user_id, id')
+        .eq('lemon_squeezy_id', lemonSqueezyId)
+        .single();
+
+    if (!subscription) {
+        console.error('[Webhook] Subscription not found for failed payment');
+        return;
+    }
+
+    // Update subscription status
+    await supabase
+        .from('subscriptions')
+        .update({
+            status: 'past_due',
+            updated_at: new Date().toISOString(),
+        })
+        .eq('lemon_squeezy_id', lemonSqueezyId);
+
+    console.log('[Payment Failed]', {
+        subscriptionId: lemonSqueezyId,
     });
 }

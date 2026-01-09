@@ -46,10 +46,11 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Apply Poppins font globally to all elements */
+/* Apply Poppins font globally to all elements and remove default outlines */
 * {
   font-family: var(--font-poppins), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  outline: none !important;
 }
 
 body {

@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import AmazonScraper from '@/lib/scrapers/amazonScraper';
 
+export const dynamic = 'force-dynamic';
+
+
 const amazonScraper = new AmazonScraper();
 
 export async function GET() {
